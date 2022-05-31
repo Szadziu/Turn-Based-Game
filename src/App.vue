@@ -4,7 +4,7 @@
       <button @click="chooseHero(1)" class="hero_1">Warrior</button>
       <button @click="chooseHero(2)" class="hero_2">Mage</button>
       <button @click="chooseHero(3)" class="hero_3">Rogue</button>
-      <div>
+      <div v-if="isGame">
         Currently chosen hero is:
         <strong
           :style="
@@ -16,7 +16,7 @@
           {{ currentHero.name ? currentHero.name : 'choose a hero' }}
         </strong>
       </div>
-      <div class="hero_actions">
+      <div class="hero_actions" v-if="isGame">
         <button @click="performAttack(currentHero, currentMonster, 'MELEE')">
           attack
         </button>
@@ -63,8 +63,15 @@ export default {
     };
   },
 
+  computed: {
+    isGame() {
+      return !!this.allMonsters.length;
+    },
+  },
+
   methods: {
     chooseHero(hero) {
+      this.allMonsters = Monsters;
       this.createHero(hero);
       this.setCurrentMonster();
     },
@@ -82,7 +89,7 @@ export default {
       this.allMonsters = this.allMonsters.filter(
         (monster) => this.currentMonster.name !== monster.name
       );
-      if (this.allMonsters.length === 0) {
+      if (!this.isGame) {
         console.log('pokonałeś wszystkie potwory');
         return;
       }
@@ -94,7 +101,7 @@ export default {
       attacker.endTurn();
       if (enemy.isDead()) {
         this.monsterDead();
-        console.log('przeciwnik nie żyje');
+        console.log('przeciwnik poległ');
       }
     },
   },

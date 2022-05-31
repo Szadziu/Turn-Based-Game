@@ -8,7 +8,7 @@ export class Hero extends Entity {
   }
   specialAttack() {
     console.log('special atak');
-    this.endTurn();
     this.specialAttackCooldown = 6;
+    this.endTurn();
   }
 }

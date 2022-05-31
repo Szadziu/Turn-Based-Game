@@ -33,7 +33,7 @@ export class Entity {
     console.log(
       `uderzono za ${amount} pkt. ${
         type === 'MELEE' ? 'wręcz' : 'zaklęciem'
-      }, przeciwnikowi pozostało ${this.currentHealth} pkt. życia`
+      } przeciwnikowi pozostało ${this.currentHealth} pkt. życia`
     );
   }
 
