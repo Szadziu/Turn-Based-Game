@@ -17,8 +17,12 @@
         </strong>
       </div>
       <div class="hero_actions">
-        <button @click="currentHero.castSpell(monster)">attack</button>
-        <button>cast spell</button>
+        <button @click="currentHero.executeAttack(currentMonster, 'MELEE')">
+          attack
+        </button>
+        <button @click="currentHero.executeAttack(currentMonster, 'MAGIC')">
+          cast spell
+        </button>
         <button>heal</button>
         <button @click="currentHero.specialAttack()">special attack</button>
       </div>
@@ -29,6 +33,7 @@
 <script>
 import { Heroes, Monsters } from './entities';
 import { Hero } from './Hero';
+import { Monster } from './Monster';
 
 export default {
   name: 'App',
@@ -47,7 +52,7 @@ export default {
 
     setCurrentMonster() {
       const random = Math.floor(Math.random() * this.allMonsters.length);
-      this.currentMonster = this.allMonsters[random];
+      this.currentMonster = new Monster(this.allMonsters[random]);
     },
 
     createHero(index) {
@@ -55,6 +60,7 @@ export default {
     },
   },
 };
+
 // for (const hero of Heroes) {
 //   Heroes[hero.name] = new Entity(hero);
 // }

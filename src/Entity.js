@@ -14,15 +14,21 @@ export class Entity {
   //   this.name = value.toLowerCase()
   // }
 
-  _isTypeofEntity(x) {
-    if (!(x instanceof Entity)) {
-      throw new Error('Invalid class passed, expected Entity');
-    }
-  }
+  // _isTypeofEntity(x) {
+  //   if (!(x instanceof Entity)) {
+  //     throw new Error('Invalid class passed, expected Entity');
+  //   }
+  // }
 
+  // castSpell(enemy) {
+  //   // type guard
+  //   this._isTypeofEntity(enemy);
+
+  //   enemy.takeDamage(this.magicKnowledge);
+  // }
   executeAttack(enemy, type) {
     // type guard
-    this._isTypeofEntity(enemy);
+    // this._isTypeofEntity(enemy);
 
     if (!type) {
       // max - monster
@@ -33,19 +39,11 @@ export class Entity {
       }
     } else if (type === ATTACK_TYPES_ENUM.MAGIC) {
       //magic
+      enemy.takeDamage(this.magicKnowledge);
     } else if (type === ATTACK_TYPES_ENUM.MELEE) {
       // melee
+      enemy.takeDamage(this.combatEfficiency);
     }
-
-    enemy.takeDamage(this.combatEfficiency);
-  }
-
-  // do wyjebania potencjalnie
-  castSpell(enemy) {
-    // type guard
-    this._isTypeofEntity(enemy);
-
-    enemy.takeDamage(this.magicKnowledge);
   }
 
   takeDamage(amount, type = ATTACK_TYPES_ENUM.MELEE) {
@@ -57,7 +55,6 @@ export class Entity {
   }
 }
 
-// enum - tak tylko proponuje
 const ATTACK_TYPES_ENUM = {
   MELEE: 'MELEE',
   MAGIC: 'MAGIC',

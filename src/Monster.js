@@ -1,8 +1,7 @@
 import { Entity } from './Entity';
 
 export class Monster extends Entity {
-  constructor(level, ...rest) {
+  constructor(...rest) {
     super(...rest);
-    this.level = level;
   }
 }
