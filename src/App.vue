@@ -17,10 +17,10 @@
         </strong>
       </div>
       <div class="hero_actions">
-        <button @click="currentHero.executeAttack(currentMonster, 'MELEE')">
+        <button @click="performAttack(currentHero, currentMonster, 'MELEE')">
           attack
         </button>
-        <button @click="currentHero.executeAttack(currentMonster, 'MAGIC')">
+        <button @click="performAttack(currentHero, currentMonster, 'MAGIC')">
           cast spell
         </button>
         <button>heal</button>
@@ -44,6 +44,7 @@ export default {
       allMonsters: Monsters,
     };
   },
+
   methods: {
     chooseHero(hero) {
       this.createHero(hero);
@@ -57,6 +58,25 @@ export default {
 
     createHero(index) {
       this.currentHero = new Hero(Heroes[index - 1]);
+    },
+
+    monsterDead() {
+      this.allMonsters = this.allMonsters.filter(
+        (monster) => this.currentMonster.name !== monster.name
+      );
+      if (this.allMonsters.length === 0) {
+        console.log('pokonałeś wszystkie potwory');
+        return;
+      }
+      this.setCurrentMonster();
+    },
+
+    performAttack(attacker, enemy, type) {
+      attacker.executeAttack(enemy, type);
+      if (enemy.health <= 0) {
+        this.monsterDead();
+        console.log('przeciwnik nie żyje');
+      }
     },
   },
 };

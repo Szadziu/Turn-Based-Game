@@ -30,19 +30,21 @@ export class Entity {
     // type guard
     // this._isTypeofEntity(enemy);
 
-    if (!type) {
-      // max - monster
-      if (enemy.combatEfficiency > enemy.magicKnowledge) {
-        // spell?
-      } else {
-        // combat?
+    if (enemy.health > 0) {
+      if (!type) {
+        // max - monster
+        if (enemy.combatEfficiency > enemy.magicKnowledge) {
+          // spell?
+        } else {
+          // combat?
+        }
+      } else if (type === ATTACK_TYPES_ENUM.MAGIC) {
+        //magic
+        enemy.takeDamage(this.magicKnowledge);
+      } else if (type === ATTACK_TYPES_ENUM.MELEE) {
+        // melee
+        enemy.takeDamage(this.combatEfficiency);
       }
-    } else if (type === ATTACK_TYPES_ENUM.MAGIC) {
-      //magic
-      enemy.takeDamage(this.magicKnowledge);
-    } else if (type === ATTACK_TYPES_ENUM.MELEE) {
-      // melee
-      enemy.takeDamage(this.combatEfficiency);
     }
   }
 
@@ -52,6 +54,10 @@ export class Entity {
     console.log(
       `uderzono za ${amount} pkt. pozostało ${this.health} pkt. życia`
     );
+  }
+
+  isDead() {
+    return this.health <= 0;
   }
 }
 
