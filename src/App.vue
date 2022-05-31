@@ -6,7 +6,15 @@
       <button @click="chooseHero(3)" class="hero_3">H-3</button>
       <div>
         Currently chosen hero is:
-        {{ currentHero.name ? currentHero.name : 'choose a hero' }}
+        <strong
+          :style="
+            currentHero || {
+              color: 'red',
+            }
+          "
+        >
+          {{ currentHero.name ? currentHero.name : 'choose a hero' }}
+        </strong>
       </div>
       <div class="hero_actions">
         <button @click="currentHero.castSpell(monster)">attack</button>
@@ -19,7 +27,7 @@
 </template>
 
 <script>
-import { Heroes } from './entities';
+import { Heroes, Monsters } from './entities';
 import { Hero } from './Hero';
 
 export default {
@@ -27,11 +35,19 @@ export default {
   data() {
     return {
       currentHero: '',
+      currentMonster: '',
+      allMonsters: Monsters,
     };
   },
   methods: {
     chooseHero(hero) {
       this.createHero(hero);
+      this.setCurrentMonster();
+    },
+
+    setCurrentMonster() {
+      const random = Math.floor(Math.random() * this.allMonsters.length);
+      this.currentMonster = this.allMonsters[random];
     },
 
     createHero(index) {
