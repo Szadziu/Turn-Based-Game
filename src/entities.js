@@ -1,21 +1,21 @@
 export const Heroes = [
   {
-    name: '_h1',
-    health: 30,
-    combatEfficiency: 15,
-    magicKnowledge: 3,
-  },
-  {
-    name: '_h2',
+    name: 'warrior',
     health: 40,
-    combatEfficiency: 5,
-    magicKnowledge: 5,
+    combatEfficiency: 15,
+    magicKnowledge: 1,
   },
   {
-    name: '_h3',
+    name: 'mage',
     health: 20,
     combatEfficiency: 2,
-    magicKnowledge: 2,
+    magicKnowledge: 14,
+  },
+  {
+    name: 'rogue',
+    health: 30,
+    combatEfficiency: 9,
+    magicKnowledge: 5,
   },
 ];
 

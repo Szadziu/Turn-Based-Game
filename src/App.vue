@@ -1,9 +1,9 @@
 <template>
   <div id="app">
     <div class="hero_choice">
-      <button @click="chooseHero(1)" class="hero_1">H-1</button>
-      <button @click="chooseHero(2)" class="hero_2">H-2</button>
-      <button @click="chooseHero(3)" class="hero_3">H-3</button>
+      <button @click="chooseHero(1)" class="hero_1">Warrior</button>
+      <button @click="chooseHero(2)" class="hero_2">Mage</button>
+      <button @click="chooseHero(3)" class="hero_3">Rogue</button>
       <div>
         Currently chosen hero is:
         <strong
@@ -27,9 +27,22 @@
           :disabled="currentHero.healingCooldown || false"
           @click="currentHero.healInjures(10)"
         >
-          heal
+          heal{{
+            currentHero.healingCooldown
+              ? '(' + currentHero.healingCooldown + ')'
+              : ''
+          }}
         </button>
-        <button @click="currentHero.specialAttack()">special attack</button>
+        <button
+          @click="currentHero.specialAttack()"
+          :disabled="currentHero.specialAttackCooldown || false"
+        >
+          special attack{{
+            currentHero.specialAttackCooldown
+              ? '(' + currentHero.specialAttackCooldown + ')'
+              : ''
+          }}
+        </button>
       </div>
     </div>
   </div>

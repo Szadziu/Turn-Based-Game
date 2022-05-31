@@ -29,20 +29,22 @@ export class Entity {
   }
 
   takeDamage(amount, type = ATTACK_TYPES_ENUM.MELEE) {
-    console.log(type);
     this.currentHealth -= amount;
     console.log(
-      `uderzono za ${amount} pkt. pozostało ${this.currentHealth} pkt. życia`
+      `uderzono za ${amount} pkt. ${
+        type === 'MELEE' ? 'wręcz' : 'zaklęciem'
+      }, przeciwnikowi pozostało ${this.currentHealth} pkt. życia`
     );
   }
 
   healInjures(amount) {
-    this.healingCooldown = 2;
     if (this.currentHealth + amount > this.maxHealth) {
       this.currentHealth = this.maxHealth;
     } else {
       this.currentHealth += amount;
     }
+    this.endTurn();
+    this.healingCooldown = 2;
     console.log(
       `wyleczono za ${this.maxHealth - this.currentHealth} pkt. pozostało ${
         this.currentHealth
@@ -58,8 +60,14 @@ export class Entity {
     if (this.healingCooldown > 0) {
       this.healingCooldown--;
     }
+    if (this.specialAttackCooldown > 0) {
+      this.specialAttackCooldown--;
+    }
     console.log(
       `obecny cooldown na leczenie wynosi: ${this.healingCooldown} tury`
+    );
+    console.log(
+      `obecny cooldown na atak specjalny wynosi: ${this.specialAttackCooldown} tury`
     );
   }
 }
