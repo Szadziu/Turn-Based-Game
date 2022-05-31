@@ -1,49 +1,49 @@
 <template>
   <div id="app">
-    <div class="hero_choice">
+    <div class="hero_choice" v-if="!isGame">
       <button @click="chooseHero(1)" class="hero_1">Warrior</button>
       <button @click="chooseHero(2)" class="hero_2">Mage</button>
       <button @click="chooseHero(3)" class="hero_3">Rogue</button>
-      <div v-if="isGame">
-        Currently chosen hero is:
-        <strong
-          :style="
-            currentHero || {
-              color: 'red',
-            }
-          "
-        >
-          {{ currentHero.name ? currentHero.name : 'choose a hero' }}
-        </strong>
-      </div>
-      <div class="hero_actions" v-if="isGame">
-        <button @click="performAttack(currentHero, currentMonster, 'MELEE')">
-          attack
-        </button>
-        <button @click="performAttack(currentHero, currentMonster, 'MAGIC')">
-          cast spell
-        </button>
-        <button
-          :disabled="currentHero.healingCooldown || false"
-          @click="currentHero.healInjures(10)"
-        >
-          heal{{
-            currentHero.healingCooldown
-              ? '(' + currentHero.healingCooldown + ')'
-              : ''
-          }}
-        </button>
-        <button
-          @click="currentHero.specialAttack()"
-          :disabled="currentHero.specialAttackCooldown || false"
-        >
-          special attack{{
-            currentHero.specialAttackCooldown
-              ? '(' + currentHero.specialAttackCooldown + ')'
-              : ''
-          }}
-        </button>
-      </div>
+    </div>
+    <div v-if="isGame">
+      Currently chosen hero is:
+      <strong
+        :style="
+          currentHero || {
+            color: 'red',
+          }
+        "
+      >
+        {{ currentHero.name ? currentHero.name : 'choose a hero' }}
+      </strong>
+    </div>
+    <div class="hero_actions" v-if="isGame">
+      <button @click="performAttack(currentHero, currentMonster, 'MELEE')">
+        attack
+      </button>
+      <button @click="performAttack(currentHero, currentMonster, 'MAGIC')">
+        cast spell
+      </button>
+      <button
+        :disabled="currentHero.healingCooldown || false"
+        @click="currentHero.healInjures(10)"
+      >
+        heal{{
+          currentHero.healingCooldown
+            ? '(' + currentHero.healingCooldown + ')'
+            : ''
+        }}
+      </button>
+      <button
+        @click="currentHero.specialAttack()"
+        :disabled="currentHero.specialAttackCooldown || false"
+      >
+        special attack{{
+          currentHero.specialAttackCooldown
+            ? '(' + currentHero.specialAttackCooldown + ')'
+            : ''
+        }}
+      </button>
     </div>
   </div>
 </template>
@@ -59,7 +59,7 @@ export default {
     return {
       currentHero: '',
       currentMonster: '',
-      allMonsters: Monsters,
+      allMonsters: [],
     };
   },
 

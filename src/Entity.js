@@ -10,19 +10,21 @@ export class Entity {
   }
 
   executeAttack(enemy, type) {
+    const powerOfAttack = +(Math.random() * (1 - 0.5) + 0.5).toFixed(2);
+    const powerOfMagic = +(Math.random() * (1.8 - 0.3) + 0.3).toFixed(2);
+
+    console.log(powerOfAttack, powerOfMagic);
+
     if (enemy.currentHealth > 0) {
       if (!type) {
-        // max - monster
         if (enemy.combatEfficiency > enemy.magicKnowledge) {
-          // spell?
+          enemy.takeDamage(this.magicKnowledge);
         } else {
-          // combat?
+          enemy.takeDamage(this.combatEfficiency);
         }
       } else if (type === ATTACK_TYPES_ENUM.MAGIC) {
-        //magic
         enemy.takeDamage(this.magicKnowledge);
       } else if (type === ATTACK_TYPES_ENUM.MELEE) {
-        // melee
         enemy.takeDamage(this.combatEfficiency);
       }
     }
