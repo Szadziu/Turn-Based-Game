@@ -2,9 +2,11 @@ export class Entity {
   constructor({ name, health, combatEfficiency, magicKnowledge }) {
     this.name = name;
     this.currentHealth = health;
-    this.maxHealth = health;
     this.combatEfficiency = combatEfficiency;
     this.magicKnowledge = magicKnowledge;
+
+    this.maxHealth = health;
+    this.healingCooldown = 2;
   }
 
   executeAttack(enemy, type) {
@@ -35,18 +37,30 @@ export class Entity {
   }
 
   healInjures(amount) {
+    this.healingCooldown = 2;
     if (this.currentHealth + amount > this.maxHealth) {
       this.currentHealth = this.maxHealth;
     } else {
       this.currentHealth += amount;
     }
     console.log(
-      `wyleczono za ${amount} pkt. pozostało ${this.currentHealth} pkt. życia`
+      `wyleczono za ${this.maxHealth - this.currentHealth} pkt. pozostało ${
+        this.currentHealth
+      } pkt. życia`
     );
   }
 
   isDead() {
     return this.currentHealth <= 0;
+  }
+
+  endTurn() {
+    if (this.healingCooldown > 0) {
+      this.healingCooldown--;
+    }
+    console.log(
+      `obecny cooldown na leczenie wynosi: ${this.healingCooldown} tury`
+    );
   }
 }
 

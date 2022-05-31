@@ -23,7 +23,12 @@
         <button @click="performAttack(currentHero, currentMonster, 'MAGIC')">
           cast spell
         </button>
-        <button @click="currentHero.healInjures(10)">heal</button>
+        <button
+          :disabled="currentHero.healingCooldown || false"
+          @click="currentHero.healInjures(10)"
+        >
+          heal
+        </button>
         <button @click="currentHero.specialAttack()">special attack</button>
       </div>
     </div>
@@ -73,6 +78,7 @@ export default {
 
     performAttack(attacker, enemy, type) {
       attacker.executeAttack(enemy, type);
+      attacker.endTurn();
       if (enemy.isDead()) {
         this.monsterDead();
         console.log('przeciwnik nie żyje');
