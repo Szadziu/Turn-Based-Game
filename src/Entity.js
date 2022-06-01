@@ -1,3 +1,5 @@
+import { getRandomNumFromRange } from './helpers';
+
 export class Entity {
   constructor({ name, health, combatEfficiency, magicKnowledge }) {
     this.name = name;
@@ -10,25 +12,40 @@ export class Entity {
   }
 
   executeAttack(enemy, type) {
-    const powerOfAttack = +(Math.random() * (1 - 0.5) + 0.5).toFixed(2);
-    const powerOfMagic = +(Math.random() * (1.8 - 0.3) + 0.3).toFixed(2);
+    const powerOfAttack = getRandomNumFromRange(50, 150);
+    const powerOfMagic = getRandomNumFromRange(30, 180);
+
+    // const powerOfAttack = +(Math.random() * (1 - 0.5) + 0.5).toFixed(2);
+    // const powerOfMagic = +(Math.random() * (1.8 - 0.3) + 0.3).toFixed(2);
 
     console.log(powerOfAttack, powerOfMagic);
 
-    if (enemy.currentHealth > 0) {
-      if (!type) {
-        if (enemy.combatEfficiency > enemy.magicKnowledge) {
-          enemy.takeDamage(this.magicKnowledge);
-        } else {
-          enemy.takeDamage(this.combatEfficiency);
-        }
-      } else if (type === ATTACK_TYPES_ENUM.MAGIC) {
-        enemy.takeDamage(this.magicKnowledge);
-      } else if (type === ATTACK_TYPES_ENUM.MELEE) {
-        enemy.takeDamage(this.combatEfficiency);
-      }
+    if (type === ATTACK_TYPES_ENUM.MAGIC) {
+      enemy.takeDamage(this.magicKnowledge);
+    } else if (type === ATTACK_TYPES_ENUM.MELEE) {
+      enemy.takeDamage(this.combatEfficiency);
     }
   }
+  // executeAttack(enemy, type) {
+  //   const powerOfAttack = +(Math.random() * (1 - 0.5) + 0.5).toFixed(2);
+  //   const powerOfMagic = +(Math.random() * (1.8 - 0.3) + 0.3).toFixed(2);
+
+  //   console.log(powerOfAttack, powerOfMagic);
+
+  //   if (enemy.currentHealth > 0) {
+  //     if (!type) {
+  //       if (enemy.combatEfficiency > enemy.magicKnowledge) {
+  //         enemy.takeDamage(this.magicKnowledge);
+  //       } else {
+  //         enemy.takeDamage(this.combatEfficiency);
+  //       }
+  //     } else if (type === ATTACK_TYPES_ENUM.MAGIC) {
+  //       enemy.takeDamage(this.magicKnowledge);
+  //     } else if (type === ATTACK_TYPES_ENUM.MELEE) {
+  //       enemy.takeDamage(this.combatEfficiency);
+  //     }
+  //   }
+  // }
 
   takeDamage(amount, type = ATTACK_TYPES_ENUM.MELEE) {
     this.currentHealth -= amount;
