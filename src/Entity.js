@@ -11,49 +11,22 @@ export class Entity {
     this.healingCooldown = 2;
   }
 
-  executeAttack(enemy, type) {
+  executeAttack() {
     const powerOfAttack = getRandomNumFromRange(50, 150);
-    const powerOfMagic = getRandomNumFromRange(30, 180);
-
-    // const powerOfAttack = +(Math.random() * (1 - 0.5) + 0.5).toFixed(2);
-    // const powerOfMagic = +(Math.random() * (1.8 - 0.3) + 0.3).toFixed(2);
-
-    console.log(powerOfAttack, powerOfMagic);
-
-    if (type === ATTACK_TYPES_ENUM.MAGIC) {
-      enemy.takeDamage(this.magicKnowledge);
-    } else if (type === ATTACK_TYPES_ENUM.MELEE) {
-      enemy.takeDamage(this.combatEfficiency);
-    }
+    this.calcCooldowns();
+    console.log(`hit for ${powerOfAttack * this.combatEfficiency}`);
+    return powerOfAttack * this.combatEfficiency;
   }
-  // executeAttack(enemy, type) {
-  //   const powerOfAttack = +(Math.random() * (1 - 0.5) + 0.5).toFixed(2);
-  //   const powerOfMagic = +(Math.random() * (1.8 - 0.3) + 0.3).toFixed(2);
 
-  //   console.log(powerOfAttack, powerOfMagic);
+  castSpell() {
+    const powerOfMagic = getRandomNumFromRange(30, 180);
+    this.calcCooldowns();
+    console.log(`cast a spell for ${powerOfMagic * this.magicKnowledge}`);
+    return powerOfMagic * this.magicKnowledge;
+  }
 
-  //   if (enemy.currentHealth > 0) {
-  //     if (!type) {
-  //       if (enemy.combatEfficiency > enemy.magicKnowledge) {
-  //         enemy.takeDamage(this.magicKnowledge);
-  //       } else {
-  //         enemy.takeDamage(this.combatEfficiency);
-  //       }
-  //     } else if (type === ATTACK_TYPES_ENUM.MAGIC) {
-  //       enemy.takeDamage(this.magicKnowledge);
-  //     } else if (type === ATTACK_TYPES_ENUM.MELEE) {
-  //       enemy.takeDamage(this.combatEfficiency);
-  //     }
-  //   }
-  // }
-
-  takeDamage(amount, type = ATTACK_TYPES_ENUM.MELEE) {
+  takeDamage(amount) {
     this.currentHealth -= amount;
-    console.log(
-      `uderzono za ${amount} pkt. ${
-        type === 'MELEE' ? 'wręcz' : 'zaklęciem'
-      } przeciwnikowi pozostało ${this.currentHealth} pkt. życia`
-    );
   }
 
   healInjures(amount) {
@@ -62,43 +35,21 @@ export class Entity {
     } else {
       this.currentHealth += amount;
     }
-    this.endTurn();
+    this.calcCooldowns();
     this.healingCooldown = 2;
-    console.log(
-      `wyleczono za ${this.maxHealth - this.currentHealth} pkt. pozostało ${
-        this.currentHealth
-      } pkt. życia`
-    );
+    console.log('%chealed', 'color: green');
   }
 
   isDead() {
     return this.currentHealth <= 0;
   }
 
-  endTurn() {
+  calcCooldowns() {
     if (this.healingCooldown > 0) {
       this.healingCooldown--;
     }
     if (this.specialAttackCooldown > 0) {
       this.specialAttackCooldown--;
     }
-    console.log(
-      `obecny cooldown na leczenie wynosi: ${this.healingCooldown} tury`
-    );
-    console.log(
-      `obecny cooldown na atak specjalny wynosi: ${this.specialAttackCooldown} tury`
-    );
   }
 }
-
-const ATTACK_TYPES_ENUM = {
-  MELEE: 'MELEE',
-  MAGIC: 'MAGIC',
-};
-
-//* guard instance
-// _isTypeofEntity(x) {
-//   if (!(x instanceof Entity)) {
-//     throw new Error('Invalid class passed, expected Entity');
-//   }
-// }

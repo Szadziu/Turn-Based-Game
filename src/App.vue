@@ -18,15 +18,15 @@
       </strong>
     </div>
     <div class="hero_actions" v-if="isGame">
-      <button @click="performAttack(currentHero, currentMonster, 'MELEE')">
+      <button @click="performAttack(currentHero.executeAttack())">
         attack
       </button>
-      <button @click="performAttack(currentHero, currentMonster, 'MAGIC')">
+      <button @click="performAttack(currentHero.castSpell())">
         cast spell
       </button>
       <button
         :disabled="currentHero.healingCooldown || false"
-        @click="currentHero.healInjures(10)"
+        @click="healSelf()"
       >
         heal{{
           currentHero.healingCooldown
@@ -44,11 +44,31 @@
             : ''
         }}
       </button>
+      <div class="battle__content">
+        <div class="card">
+          <h3 class="card__name">{{ currentHero.name }}</h3>
+          <div class="card__stats">
+            <p>HP: {{ currentHero.currentHealth }}</p>
+            <p>power of combat: {{ currentHero.combatEfficiency }}</p>
+            <p>power of magic: {{ currentHero.magicKnowledge }}</p>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="card__name">{{ currentMonster.name }}</h3>
+          <div class="card__stats">
+            <p>HP: {{ currentMonster.currentHealth }}</p>
+            <p>level: {{ currentMonster.level }}</p>
+            <p>power of combat: {{ currentMonster.combatEfficiency }}</p>
+            <p>power of magic: {{ currentMonster.magicKnowledge }}</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import { RANDOM_ACTIONS_ENUM } from './constants';
 import { Heroes, Monsters } from './entities';
 import { Hero } from './Hero';
 import { Monster } from './Monster';
@@ -86,33 +106,102 @@ export default {
     },
 
     monsterDead() {
+      console.log('%cmonster died', 'color: red');
       this.allMonsters = this.allMonsters.filter(
         (monster) => this.currentMonster.name !== monster.name
       );
       if (!this.isGame) {
-        console.log('pokonałeś wszystkie potwory');
+        console.log(
+          '%cYOU DID IT !',
+          'color: blue; font-weight: 700',
+          'the world was cleared'
+        );
         return;
       }
       this.setCurrentMonster();
     },
 
-    performAttack(attacker, enemy, type) {
-      attacker.executeAttack(enemy, type);
-      attacker.endTurn();
-      if (enemy.isDead()) {
+    performAttack(attackValue) {
+      this.currentMonster.takeDamage(attackValue);
+      if (this.currentMonster.isDead()) {
         this.monsterDead();
-        console.log('przeciwnik poległ');
+      } else {
+        this.endTurn();
+      }
+    },
+
+    healSelf() {
+      this.currentHero.healInjures(10);
+      this.endTurn();
+    },
+
+    endTurn() {
+      const rdmAction =
+        RANDOM_ACTIONS_ENUM[this.currentMonster.randomActionAI()];
+      console.log(`random action is: ${rdmAction}`);
+
+      if (
+        rdmAction === RANDOM_ACTIONS_ENUM.MELEE ||
+        rdmAction === RANDOM_ACTIONS_ENUM.MAGIC
+      ) {
+        if (
+          this.currentMonster.combatEfficiency ===
+          this.currentMonster.magicKnowledge
+        ) {
+          if (
+            this.currentHero.combatEfficiency > this.currentHero.magicKnowledge
+          ) {
+            this.currentHero.takeDamage(this.currentMonster.castSpell());
+          } else {
+            this.currentHero.takeDamage(this.currentMonster.executeAttack());
+          }
+        } else if (
+          this.currentMonster.combatEfficiency >
+          this.currentMonster.magicKnowledge
+        ) {
+          this.currentHero.takeDamage(this.currentMonster.executeAttack());
+        } else {
+          this.currentHero.takeDamage(this.currentMonster.castSpell());
+        }
+      } else if (rdmAction === RANDOM_ACTIONS_ENUM.HEAL) {
+        this.currentMonster.healInjures(10);
       }
     },
   },
 };
-
-// for (const hero of Heroes) {
-//   Heroes[hero.name] = new Entity(hero);
-// }
 </script>
 
-<style>
+<style scoped lang="scss">
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.battle__content {
+  display: flex;
+  justify-content: space-around;
+}
+
+.card {
+  width: 150px;
+  height: 200px;
+  border: 1px solid gray;
+  justify-content: center;
+
+  &__name {
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  &__stats {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 10px;
+    padding-left: 5px;
+  }
+}
 button {
   cursor: pointer;
   margin: 10px;
