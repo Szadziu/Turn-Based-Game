@@ -106,6 +106,7 @@ export default {
     },
 
     monsterDead() {
+      this.currentHero.healInjures(this.currentHero.maxHealth / 2);
       console.log('%cmonster died', 'color: red');
       this.allMonsters = this.allMonsters.filter(
         (monster) => this.currentMonster.name !== monster.name

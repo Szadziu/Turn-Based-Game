@@ -29,17 +29,28 @@ export class Entity {
     this.currentHealth -= amount;
   }
 
-  healInjures() {
-    const healing = this.maxHealth * getRandomFloat(10, 50);
-
-    if (this.currentHealth + healing > this.maxHealth) {
-      this.currentHealth = this.maxHealth;
+  healInjures(value) {
+    if (value) {
+      if (this.currentHealth + value > this.maxHealth) {
+        this.currentHealth = this.maxHealth;
+      } else {
+        this.currentHealth += value;
+      }
+      this.calcCooldowns();
+      this.healingCooldown = 2;
+      console.log('%chealed for', 'color: green', value);
     } else {
-      this.currentHealth += healing;
+      const healing = this.maxHealth * getRandomFloat(10, 50);
+
+      if (this.currentHealth + healing > this.maxHealth) {
+        this.currentHealth = this.maxHealth;
+      } else {
+        this.currentHealth += healing;
+      }
+      this.calcCooldowns();
+      this.healingCooldown = 2;
+      console.log('%chealed for', 'color: green', healing);
     }
-    this.calcCooldowns();
-    this.healingCooldown = 2;
-    console.log('%chealed for', 'color: green', healing);
   }
 
   isDead() {
