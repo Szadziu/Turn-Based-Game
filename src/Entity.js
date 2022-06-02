@@ -29,15 +29,17 @@ export class Entity {
     this.currentHealth -= amount;
   }
 
-  healInjures(amount) {
-    if (this.currentHealth + amount > this.maxHealth) {
+  healInjures() {
+    const healing = this.maxHealth * getRandomFloat(10, 50);
+
+    if (this.currentHealth + healing > this.maxHealth) {
       this.currentHealth = this.maxHealth;
     } else {
-      this.currentHealth += amount;
+      this.currentHealth += healing;
     }
     this.calcCooldowns();
     this.healingCooldown = 2;
-    console.log('%chealed', 'color: green');
+    console.log('%chealed for', 'color: green', healing);
   }
 
   isDead() {

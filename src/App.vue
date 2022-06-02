@@ -131,7 +131,7 @@ export default {
     },
 
     healSelf() {
-      this.currentHero.healInjures(10);
+      this.currentHero.healInjures();
       this.endTurn();
     },
 
@@ -164,7 +164,7 @@ export default {
           this.currentHero.takeDamage(this.currentMonster.castSpell());
         }
       } else if (rdmAction === RANDOM_ACTIONS_ENUM.HEAL) {
-        this.currentMonster.healInjures(10);
+        this.currentMonster.healInjures();
       }
 
       if (this.currentHero.currentHealth <= 0) {
