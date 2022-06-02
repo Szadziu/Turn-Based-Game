@@ -9,13 +9,15 @@ export class Hero extends Entity {
   }
   specialAttack() {
     const powerOfAttack = getRandomFloat(100, 300);
+    const highestSpec =
+      this.combatEfficiency > this.magicKnowledge
+        ? this.combatEfficiency
+        : this.magicKnowledge;
 
     this.calcCooldowns();
     this.specialAttackCooldown = 6;
 
-    console.log(
-      `hit special attack for ${powerOfAttack * this.combatEfficiency}`
-    );
+    console.log(`hit special attack for ${powerOfAttack * highestSpec}`);
 
     return powerOfAttack * this.combatEfficiency;
   }
