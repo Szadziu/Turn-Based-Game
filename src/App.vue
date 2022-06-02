@@ -35,7 +35,7 @@
         }}
       </button>
       <button
-        @click="currentHero.specialAttack()"
+        @click="performAttack(currentHero.specialAttack())"
         :disabled="currentHero.specialAttackCooldown || false"
       >
         special attack{{
