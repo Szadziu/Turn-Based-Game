@@ -1,4 +1,4 @@
-import { getRandomNumFromRange } from './helpers';
+import { getRandomFloat } from './helpers';
 
 export class Entity {
   constructor({ name, health, combatEfficiency, magicKnowledge }) {
@@ -12,14 +12,14 @@ export class Entity {
   }
 
   executeAttack() {
-    const powerOfAttack = getRandomNumFromRange(50, 150);
+    const powerOfAttack = getRandomFloat(50, 150);
     this.calcCooldowns();
     console.log(`hit for ${powerOfAttack * this.combatEfficiency}`);
     return powerOfAttack * this.combatEfficiency;
   }
 
   castSpell() {
-    const powerOfMagic = getRandomNumFromRange(30, 180);
+    const powerOfMagic = getRandomFloat(30, 180);
     this.calcCooldowns();
     console.log(`cast a spell for ${powerOfMagic * this.magicKnowledge}`);
     return powerOfMagic * this.magicKnowledge;

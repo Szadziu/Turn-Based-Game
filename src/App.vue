@@ -85,7 +85,7 @@ export default {
 
   computed: {
     isGame() {
-      return !!this.allMonsters.length;
+      return !!this.allMonsters.length && this.currentHero.currentHealth >= 0;
     },
   },
 
@@ -165,6 +165,14 @@ export default {
         }
       } else if (rdmAction === RANDOM_ACTIONS_ENUM.HEAL) {
         this.currentMonster.healInjures(10);
+      }
+
+      if (this.currentHero.currentHealth <= 0) {
+        console.log(
+          '%cYOU LOST !',
+          'color: red; font-weight: 700',
+          'the world was destroyed'
+        );
       }
     },
   },
