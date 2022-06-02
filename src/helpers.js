@@ -1,7 +1,9 @@
-export function getRandomFloat(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min) / 100;
+export function getRandomInt(min = 0, max = 100) {
+  let difference = max - min;
+  let rand = Math.random();
 
-  // const str = (Math.random() * (max - min) + min).toFixed(2);
+  rand = Math.floor(rand * difference);
+  rand = rand + min;
 
-  // return parseFloat(str);
+  return rand;
 }

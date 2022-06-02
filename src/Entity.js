@@ -1,4 +1,4 @@
-import { getRandomFloat } from './helpers';
+import { getRandomInt } from './helpers';
 
 export class Entity {
   constructor({ name, health, combatEfficiency, magicKnowledge }) {
@@ -12,17 +12,21 @@ export class Entity {
   }
 
   executeAttack() {
-    const powerOfAttack = getRandomFloat(50, 150);
+    const powerOfAttack = getRandomInt(50, 150);
+    const hit = Math.round((powerOfAttack * this.combatEfficiency) / 100);
     this.calcCooldowns();
-    console.log(`hit for ${powerOfAttack * this.combatEfficiency}`);
-    return powerOfAttack * this.combatEfficiency;
+
+    console.log(`hit for ${hit}`);
+    return hit;
   }
 
   castSpell() {
-    const powerOfMagic = getRandomFloat(30, 180);
+    const powerOfMagic = getRandomInt(30, 180);
+    const spell = Math.round((powerOfMagic * this.magicKnowledge) / 100);
     this.calcCooldowns();
-    console.log(`cast a spell for ${powerOfMagic * this.magicKnowledge}`);
-    return powerOfMagic * this.magicKnowledge;
+
+    console.log(`cast a spell for ${spell}`);
+    return spell;
   }
 
   takeDamage(amount) {
@@ -36,11 +40,10 @@ export class Entity {
       } else {
         this.currentHealth += value;
       }
-      this.calcCooldowns();
-      this.healingCooldown = 2;
       console.log('%chealed for', 'color: green', value);
     } else {
-      const healing = this.maxHealth * getRandomFloat(10, 50);
+      const powerOfHealing = getRandomInt(10, 50);
+      const healing = Math.round((powerOfHealing * this.maxHealth) / 100);
 
       if (this.currentHealth + healing > this.maxHealth) {
         this.currentHealth = this.maxHealth;

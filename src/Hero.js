@@ -1,5 +1,5 @@
 import { Entity } from './Entity';
-import { getRandomFloat } from './helpers';
+import { getRandomInt } from './helpers';
 
 export class Hero extends Entity {
   constructor(props) {
@@ -8,17 +8,20 @@ export class Hero extends Entity {
     this.specialAttackCooldown = 6;
   }
   specialAttack() {
-    const powerOfAttack = getRandomFloat(100, 300);
+    const powerOfAttack = getRandomInt(100, 300);
+
     const highestSpec =
       this.combatEfficiency > this.magicKnowledge
         ? this.combatEfficiency
         : this.magicKnowledge;
 
+    const special = Math.round((powerOfAttack * highestSpec) / 100);
+
     this.calcCooldowns();
     this.specialAttackCooldown = 6;
 
-    console.log(`hit special attack for ${powerOfAttack * highestSpec}`);
+    console.log(`hit special attack for ${special}`);
 
-    return powerOfAttack * this.combatEfficiency;
+    return special;
   }
 }
