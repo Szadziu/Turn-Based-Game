@@ -1,56 +1,63 @@
 <template>
   <div id="app">
-    <div v-if="!isGame">
-      <FancyButton @click="chooseHero(1)" :class="'hero--viking'"
-        >Viking</FancyButton
-      >
-      <FancyButton @click="chooseHero(2)" :class="'hero--wizard'"
-        >Wizard</FancyButton
-      >
-      <FancyButton @click="chooseHero(3)" :class="'hero--rogue'"
-        >Rogue</FancyButton
-      >
-    </div>
+    <transition name="slide" mode="out-in" appear>
+      <div v-if="!isGame">
+        <FancyButton @click="chooseHero(1)" :class="'hero--viking'"
+          >Viking</FancyButton
+        >
+        <FancyButton @click="chooseHero(2)" :class="'hero--wizard'"
+          >Wizard</FancyButton
+        >
+        <FancyButton @click="chooseHero(3)" :class="'hero--rogue'"
+          >Rogue</FancyButton
+        >
+      </div>
+    </transition>
 
-    <div class="battle__content" v-if="isGame">
+    <div class="battle__content">
       <div class="hero__container">
         <CharacterCard :char="currentHero" />
         <CharacterCard :char="currentMonster" />
       </div>
-      <FancyButton
-        @click="performAttack(currentHero.executeAttack())"
-        :class="'character--attack'"
-      >
-        attack
-      </FancyButton>
-      <FancyButton
-        @click="performAttack(currentHero.castSpell())"
-        :class="'character--spell'"
-      >
-        cast spell
-      </FancyButton>
-      <FancyButton
-        :disabled="currentHero.healingCooldown || false"
-        @click="healSelf()"
-        :class="'character--heal'"
-      >
-        heal{{
-          currentHero.healingCooldown
-            ? '(' + currentHero.healingCooldown + ')'
-            : ''
-        }}
-      </FancyButton>
-      <FancyButton
-        @click="performAttack(currentHero.specialAttack())"
-        :disabled="currentHero.specialAttackCooldown || false"
-        :class="'character--special'"
-      >
-        special attack{{
-          currentHero.specialAttackCooldown
-            ? '(' + currentHero.specialAttackCooldown + ')'
-            : ''
-        }}
-      </FancyButton>
+      <div class="hero__actions" v-if="isGame">
+        <FancyButton
+          @click="performAttack(currentHero.executeAttack())"
+          :class="'character--attack'"
+        >
+          attack
+        </FancyButton>
+        <FancyButton
+          @click="performAttack(currentHero.castSpell())"
+          :class="'character--spell'"
+        >
+          cast spell
+        </FancyButton>
+        <FancyButton
+          :disabled="currentHero.healingCooldown || false"
+          @click="healSelf()"
+          :class="'character--heal'"
+        >
+          heal{{
+            currentHero.healingCooldown
+              ? '(' + currentHero.healingCooldown + ')'
+              : ''
+          }}
+        </FancyButton>
+        <FancyButton
+          @click="performAttack(currentHero.specialAttack())"
+          :disabled="currentHero.specialAttackCooldown || false"
+          :class="'character--special'"
+        >
+          special attack{{
+            currentHero.specialAttackCooldown
+              ? '(' + currentHero.specialAttackCooldown + ')'
+              : ''
+          }}
+        </FancyButton>
+      </div>
+      <div v-if="currentHero.currentHealth <= 0" class="battle__results">
+        Results: Defeated monsters: 5
+      </div>
     </div>
   </div>
 </template>
@@ -172,6 +179,28 @@ export default {
   font-family: 'MedievalSharp', cursive;
 }
 
+.slide-enter-active {
+  transition-duration: 0.3s;
+  transition-timing-function: ease-in;
+}
+
+.slide-leave-active {
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+}
+
+.slide-enter-to,
+.slide-leave {
+  max-height: 100px;
+  overflow: hidden;
+}
+
+.slide-enter,
+.slide-leave-to {
+  overflow: hidden;
+  max-height: 0;
+}
+
 #app {
   max-width: 1000px;
   margin: 0 auto;
@@ -182,14 +211,21 @@ export default {
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
-  gap: 20px;
   padding: 50px 0;
   border: 1px solid gray;
+  gap: 20px;
 }
 
 .hero__container {
   display: flex;
-  width: 100%;
-  justify-content: space-around;
+  width: 90%;
+  border: 1px solid green;
+  padding: 50px 0;
+}
+
+.hero__actions {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid red;
 }
 </style>

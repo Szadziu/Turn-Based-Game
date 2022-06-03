@@ -1,18 +1,24 @@
 <template>
   <div class="healthbar">
-    <div
-      class="healthbar-percentage"
-      :style="{
-        width: value + '%',
-        backgroundColor: value > 50 ? '#42B782' : '#CC0000',
-      }"
-    ></div>
+    <div class="healthbar-percentage" :style="healthBarStyles"></div>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['value'],
+  props: {
+    value: {
+      type: Number,
+    },
+  },
+  computed: {
+    healthBarStyles() {
+      return {
+        width: this.value + '%',
+        backgroundColor: this.value > 50 ? '#42B782' : '#CC0000',
+      };
+    },
+  },
 };
 </script>
 

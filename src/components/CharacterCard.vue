@@ -1,5 +1,9 @@
 <template>
-  <div class="card">
+  <div
+    v-if="char.currentHealth"
+    class="card"
+    :class="{ dead: char.currentHealth <= 0 }"
+  >
     <div class="card__image">
       <img :src="char.image" :alt="char.name" />
     </div>
@@ -7,7 +11,7 @@
     <div v-else class="card__level">hero</div>
     <div class="card__name">{{ char.name }}</div>
     <HealthBar v-model="percentage" />
-    <div class="card__stats clearfix">
+    <div class="card__stats">
       <div class="one-third" :class="`one-third--${char.name}`">
         <div class="stat">{{ char.currentHealth }}</div>
         <div class="stat-value">HP</div>
@@ -41,6 +45,7 @@ export default {
   },
   computed: {
     percentage() {
+      if (this.char.isDead()) return 0;
       return (this.char.currentHealth * 100) / this.char.maxHealth;
     },
   },
@@ -65,6 +70,38 @@ $ogre: #826c08;
 $archer: #ee5487;
 $giant: #f6901a;
 $goblin: #82bb30;
+
+.dead {
+  filter: grayscale(1);
+}
+
+.shake {
+  animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  transform: translate3d(0, 0, 0);
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
 
 .card {
   background: white;
@@ -171,10 +208,6 @@ $goblin: #82bb30;
       text-transform: uppercase;
       font-weight: 400;
       font-size: 12px;
-    }
-
-    .no-border {
-      border-right: none;
     }
   }
 }
