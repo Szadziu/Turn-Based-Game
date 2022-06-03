@@ -1,11 +1,12 @@
 import { getRandomInt } from './helpers';
 
 export class Entity {
-  constructor({ name, health, combatEfficiency, magicKnowledge }) {
+  constructor({ name, health, combatEfficiency, magicKnowledge, img }) {
     this.name = name;
     this.currentHealth = health;
     this.combatEfficiency = combatEfficiency;
     this.magicKnowledge = magicKnowledge;
+    this.image = img;
 
     this.maxHealth = health;
     this.healingCooldown = 2;
@@ -58,6 +59,18 @@ export class Entity {
 
   isDead() {
     return this.currentHealth <= 0;
+  }
+
+  getHighestStat(check) {
+    if (this.combatEfficiency > this.magicKnowledge) {
+      return this.combatEfficiency;
+    } else if (this.combatEfficiency < this.magicKnowledge) {
+      return this.magicKnowledge;
+    } else {
+      return check.combatEfficiency > check.magicKnowledge
+        ? check.combatEfficiency
+        : check.magicKnowledge;
+    }
   }
 
   calcCooldowns() {

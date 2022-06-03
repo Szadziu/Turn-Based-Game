@@ -1,53 +1,56 @@
 <template>
   <div id="app">
-    <div class="hero_choice" v-if="!isGame">
-      <button @click="chooseHero(1)" class="hero_1">Warrior</button>
-      <button @click="chooseHero(2)" class="hero_2">Mage</button>
-      <button @click="chooseHero(3)" class="hero_3">Rogue</button>
-    </div>
-    <div v-if="isGame">
-      Currently chosen hero is:
-      <strong
-        :style="
-          currentHero || {
-            color: 'red',
-          }
-        "
+    <div v-if="!isGame">
+      <FancyButton @click="chooseHero(1)" :class="'hero--viking'"
+        >Viking</FancyButton
       >
-        {{ currentHero.name ? currentHero.name : 'choose a hero' }}
-      </strong>
+      <FancyButton @click="chooseHero(2)" :class="'hero--wizard'"
+        >Wizard</FancyButton
+      >
+      <FancyButton @click="chooseHero(3)" :class="'hero--rogue'"
+        >Rogue</FancyButton
+      >
     </div>
-    <div class="hero_actions" v-if="isGame">
-      <button @click="performAttack(currentHero.executeAttack())">
+
+    <div class="battle__content" v-if="isGame">
+      <div class="hero__container">
+        <CharacterCard :char="currentHero" />
+        <CharacterCard :char="currentMonster" />
+      </div>
+      <FancyButton
+        @click="performAttack(currentHero.executeAttack())"
+        :class="'character--attack'"
+      >
         attack
-      </button>
-      <button @click="performAttack(currentHero.castSpell())">
+      </FancyButton>
+      <FancyButton
+        @click="performAttack(currentHero.castSpell())"
+        :class="'character--spell'"
+      >
         cast spell
-      </button>
-      <button
+      </FancyButton>
+      <FancyButton
         :disabled="currentHero.healingCooldown || false"
         @click="healSelf()"
+        :class="'character--heal'"
       >
         heal{{
           currentHero.healingCooldown
             ? '(' + currentHero.healingCooldown + ')'
             : ''
         }}
-      </button>
-      <button
+      </FancyButton>
+      <FancyButton
         @click="performAttack(currentHero.specialAttack())"
         :disabled="currentHero.specialAttackCooldown || false"
+        :class="'character--special'"
       >
         special attack{{
           currentHero.specialAttackCooldown
             ? '(' + currentHero.specialAttackCooldown + ')'
             : ''
         }}
-      </button>
-      <div class="battle__content">
-        <CharacterCard :char="currentHero" />
-        <CharacterCard :char="currentMonster" />
-      </div>
+      </FancyButton>
     </div>
   </div>
 </template>
@@ -58,6 +61,7 @@ import { Heroes, Monsters } from './entities';
 import { Hero } from './Hero';
 import { Monster } from './Monster';
 import CharacterCard from './components/CharacterCard.vue';
+import FancyButton from './components/FancyButton.vue';
 
 export default {
   name: 'App',
@@ -70,6 +74,7 @@ export default {
   },
   components: {
     CharacterCard,
+    FancyButton,
   },
   computed: {
     isGame() {
@@ -137,6 +142,7 @@ export default {
             this.currentHero.takeDamage(this.currentMonster.executeAttack());
           }
         } else if (
+          // this.currentMonster.getHighestStat()
           this.currentMonster.combatEfficiency >
           this.currentMonster.magicKnowledge
         ) {
@@ -144,10 +150,10 @@ export default {
         } else {
           this.currentHero.takeDamage(this.currentMonster.castSpell());
         }
-      } else if (rdmAction === RANDOM_ACTIONS_ENUM.HEAL) {
+      } else {
         this.currentMonster.healInjures();
       }
-      if (this.currentHero.currentHealth <= 0) {
+      if (this.currentHero.isDead()) {
         console.log(
           '%cYOU LOST !',
           'color: red; font-weight: 700',
@@ -163,16 +169,27 @@ export default {
 * {
   padding: 0;
   margin: 0;
-  box-sizing: border-box;
+  font-family: 'MedievalSharp', cursive;
+}
+
+#app {
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .battle__content {
   display: flex;
+  flex-direction: column;
   justify-content: space-around;
+  align-items: center;
+  gap: 20px;
+  padding: 50px 0;
+  border: 1px solid gray;
 }
 
-button {
-  cursor: pointer;
-  margin: 10px;
+.hero__container {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
 }
 </style>
