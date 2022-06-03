@@ -1,30 +1,30 @@
 <template>
-  <div
-    v-if="char.currentHealth"
-    class="card"
-    :class="{ dead: char.currentHealth <= 0 }"
-  >
+  <div v-if="char.currentHealth" class="card" :class="{ dead: heroDead }">
     <div class="card__image">
       <img :src="char.image" :alt="char.name" />
     </div>
+
     <div v-if="char.level" class="card__level">level {{ char.level }}</div>
     <div v-else class="card__level">hero</div>
+
     <div class="card__name">{{ char.name }}</div>
-    <HealthBar v-model="percentage" />
+
+    <HealthBar color="#42B782" v-model="percentageValue" />
+
     <div class="card__stats">
       <div class="one-third" :class="`one-third--${char.name}`">
-        <div class="stat">{{ char.currentHealth }}</div>
-        <div class="stat-value">HP</div>
+        <div class="stat">HP</div>
+        <div class="stat-value">{{ char.currentHealth }}</div>
       </div>
 
       <div class="one-third" :class="`one-third--${char.name}`">
-        <div class="stat">{{ char.combatEfficiency }}</div>
-        <div class="stat-value">Combat</div>
+        <div class="stat">Combat</div>
+        <div class="stat-value">{{ char.combatEfficiency }}</div>
       </div>
 
       <div class="one-third" :class="`one-third--${char.name}`">
-        <div class="stat">{{ char.magicKnowledge }}</div>
-        <div class="stat-value">Magic</div>
+        <div class="stat">Magic</div>
+        <div class="stat-value">{{ char.magicKnowledge }}</div>
       </div>
     </div>
   </div>
@@ -38,69 +38,25 @@ export default {
   components: {
     HealthBar,
   },
-  props: {
-    char: {
-      type: Object,
-    },
-  },
+  props: ['char'],
   computed: {
-    percentage() {
-      if (this.char.isDead()) return 0;
+    percentageValue() {
+      if (this.heroDead) return 0;
       return (this.char.currentHealth * 100) / this.char.maxHealth;
+    },
+    heroDead() {
+      return this.char.currentHealth <= 0;
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@import url(https://fonts.googleapis.com/css?family=Lato:400,700,900);
+@import '@/scss/variables.scss';
 
-$border-radius-size: 14px;
-$barbarian: #ec9b3b;
-$wizard: #4facff;
-$rogue: #074322;
-
-$imp: #c775e5;
-$gnome: #82bb30;
-$goblin: #568612;
-$dragon: #056856;
-$troll: #182c5e;
-$ogre: #826c08;
-
-$archer: #ee5487;
-$giant: #f6901a;
-$goblin: #82bb30;
 
 .dead {
   filter: grayscale(1);
-}
-
-.shake {
-  animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-  transform: translate3d(0, 0, 0);
-}
-
-@keyframes shake {
-  10%,
-  90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-
-  20%,
-  80% {
-    transform: translate3d(2px, 0, 0);
-  }
-
-  30%,
-  50%,
-  70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-
-  40%,
-  60% {
-    transform: translate3d(4px, 0, 0);
-  }
 }
 
 .card {
@@ -130,7 +86,7 @@ $goblin: #82bb30;
 
   &__level {
     text-transform: uppercase;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 700;
     margin-bottom: 3px;
   }
@@ -168,9 +124,27 @@ $goblin: #82bb30;
       &--rogue {
         background-color: $rogue;
       }
+      &--knight {
+        background-color: $knight;
+      }
+      &--druid {
+        background-color: $druid;
+      }
 
       &--imp {
         background-color: $imp;
+      }
+      &--giant {
+        background-color: $giant;
+      }
+      &--harpy {
+        background-color: $harpy;
+      }
+      &--reaper {
+        background-color: $reaper;
+      }
+      &--vampire {
+        background-color: $vampire;
       }
 
       &--gnome {
@@ -199,15 +173,15 @@ $goblin: #82bb30;
       border-right: 2px solid rgba(0, 0, 0, 0.3);
     }
     .stat {
-      position: relative;
-      font-size: 24px;
+      text-transform: uppercase;
+      font-weight: 400;
+      font-size: 12px;
       margin-bottom: 10px;
     }
 
     .stat-value {
-      text-transform: uppercase;
-      font-weight: 400;
-      font-size: 12px;
+      position: relative;
+      font-size: 28px;
     }
   }
 }

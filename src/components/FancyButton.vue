@@ -100,6 +100,9 @@ export default {
 .hero--viking {
   @include fancy-btn(#ae6a06, #ffbd21, #fe8d0a, 220px, 50px);
 }
+.hero--druid {
+  @include fancy-btn(#3b290c, #3a3427, #5dc024, 220px, 50px);
+}
 
 .hero--wizard {
   @include fancy-btn(#005cc1, #50b1fe, #2082ff, 220px, 50px);
@@ -107,6 +110,12 @@ export default {
 
 .hero--rogue {
   @include fancy-btn(#3cb560, #288f47, #348269, 220px, 50px);
+}
+.hero--knight {
+  @include fancy-btn(#839187, #737774, #303836, 220px, 50px);
+}
+.hero--archer {
+  @include fancy-btn(#832844, #a3277a, #2d185e, 220px, 50px);
 }
 
 .character--attack {

@@ -2,18 +2,15 @@
   <div id="app">
     <transition name="slide" mode="out-in" appear>
       <div v-if="!isGame">
-        <FancyButton @click="chooseHero(1)" :class="'hero--viking'"
-          >Viking</FancyButton
-        >
-        <FancyButton @click="chooseHero(2)" :class="'hero--wizard'"
-          >Wizard</FancyButton
-        >
-        <FancyButton @click="chooseHero(3)" :class="'hero--rogue'"
-          >Rogue</FancyButton
+        <FancyButton
+          v-for="(hero, i) in allHeroes"
+          :key="i"
+          @click="chooseHero(i + 1)"
+          :class="`hero--${hero.name}`"
+          >{{ hero.name }}</FancyButton
         >
       </div>
     </transition>
-
     <div class="battle__content">
       <div class="hero__container">
         <CharacterCard :char="currentHero" />
@@ -37,38 +34,39 @@
           @click="healSelf()"
           :class="'character--heal'"
         >
-          heal{{
-            currentHero.healingCooldown
-              ? '(' + currentHero.healingCooldown + ')'
-              : ''
-          }}
+          heal{{ healCooldown }}
         </FancyButton>
         <FancyButton
           @click="performAttack(currentHero.specialAttack())"
           :disabled="currentHero.specialAttackCooldown || false"
           :class="'character--special'"
         >
-          special attack{{
-            currentHero.specialAttackCooldown
-              ? '(' + currentHero.specialAttackCooldown + ')'
-              : ''
-          }}
+          special attack{{ specialCooldown }}
         </FancyButton>
+
+        <TransitionGroup name="list" tag="ul" class="battle__actions-list">
+          <li v-for="(action, i) in lastActions" :key="i">{{ action }}</li>
+        </TransitionGroup>
       </div>
-      <div v-if="currentHero.currentHealth <= 0" class="battle__results">
-        Results: Defeated monsters: 5
+      <div v-if="isResults" class="battle__results">
+        Results: Defeated monsters: {{ defeated }}
+        <p v-if="currentHero.currentHealth > 0">
+          Congratulations you defeated all monsters !
+        </p>
+        <p v-else>Oh no... You lose. Maybe try again ?</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { RANDOM_ACTIONS_ENUM } from './constants';
-import { Heroes, Monsters } from './entities';
+import { HALF_OF_MAX_HERO_HEALTH, RANDOM_ACTIONS_ENUM } from './cons/constants';
+import { Heroes, Monsters } from './cons/entities';
 import { Hero } from './Hero';
 import { Monster } from './Monster';
 import CharacterCard from './components/CharacterCard.vue';
 import FancyButton from './components/FancyButton.vue';
+import { getRandomInt } from './helpers/helpers';
 
 export default {
   name: 'App',
@@ -76,8 +74,19 @@ export default {
     return {
       currentHero: '',
       currentMonster: '',
-      allMonsters: [],
+      allHeroes: Heroes,
+      allMonsters: [''],
+      defeated: 0,
+      lastActions: [],
+      skillPoints: 0,
     };
+  },
+  watch: {
+    lastActions() {
+      if (this.lastActions.length > 3) {
+        this.lastActions.shift();
+      }
+    },
   },
   components: {
     CharacterCard,
@@ -87,23 +96,53 @@ export default {
     isGame() {
       return !!this.allMonsters.length && this.currentHero.currentHealth >= 0;
     },
+    isResults() {
+      return (
+        this.currentHero.currentHealth <= 0 || this.allMonsters.length === 0
+      );
+    },
+    healCooldown() {
+      return this.currentHero.healingCooldown
+        ? '(' + this.currentHero.healingCooldown + ')'
+        : '';
+    },
+    specialCooldown() {
+      return this.currentHero.specialAttackCooldown
+        ? '(' + this.currentHero.specialAttackCooldown + ')'
+        : '';
+    },
   },
   methods: {
     chooseHero(hero) {
       this.allMonsters = Monsters;
       this.createHero(hero);
       this.setCurrentMonster();
+      this.resetStats();
     },
+
+    resetStats() {
+      this.defeated = 0;
+      this.lastActions = [];
+    },
+
     setCurrentMonster() {
-      const random = Math.floor(Math.random() * this.allMonsters.length);
+      const random = getRandomInt(0, this.allMonsters.length);
       this.currentMonster = new Monster(this.allMonsters[random]);
     },
+
     createHero(index) {
       this.currentHero = new Hero(Heroes[index - 1]);
     },
+
     monsterDead() {
-      this.currentHero.healInjures(this.currentHero.maxHealth / 2);
-      console.log('%cmonster died', 'color: red');
+      this.defeated++;
+      this.currentHero.healInjures(
+        this.currentHero.maxHealth * HALF_OF_MAX_HERO_HEALTH
+      );
+      this.lastActions.push(`${this.currentMonster.name} died`);
+      this.lastActions.push(
+        `heal up for ${this.currentHero.maxHealth * HALF_OF_MAX_HERO_HEALTH}`
+      );
       this.allMonsters = this.allMonsters.filter(
         (monster) => this.currentMonster.name !== monster.name
       );
@@ -117,42 +156,48 @@ export default {
       }
       this.setCurrentMonster();
     },
+
     performAttack(attackValue) {
       this.currentMonster.takeDamage(attackValue);
+      this.lastActions.push(`attack for ${attackValue}`);
       if (this.currentMonster.isDead()) {
         this.monsterDead();
       } else {
         this.endTurn();
       }
     },
+
     healSelf() {
       this.currentHero.healInjures();
+      this.lastActions.push(
+        `heal up for ${
+          this.currentHero.currentHealth * HALF_OF_MAX_HERO_HEALTH
+        }`
+      );
       this.endTurn();
     },
+
     endTurn() {
       const rdmAction =
         RANDOM_ACTIONS_ENUM[this.currentMonster.randomActionAI()];
-      console.log(`random action is: ${rdmAction}`);
+      this.lastActions.push(`random AI action is: ${rdmAction.toLowerCase()}`);
+
+      const heroCombat = this.currentHero.combatEfficiency;
+      const monsterCombat = this.currentMonster.combatEfficiency;
+      const heroMagic = this.currentHero.magicKnowledge;
+      const monsterMagic = this.currentMonster.magicKnowledge;
+
       if (
         rdmAction === RANDOM_ACTIONS_ENUM.MELEE ||
         rdmAction === RANDOM_ACTIONS_ENUM.MAGIC
       ) {
-        if (
-          this.currentMonster.combatEfficiency ===
-          this.currentMonster.magicKnowledge
-        ) {
-          if (
-            this.currentHero.combatEfficiency > this.currentHero.magicKnowledge
-          ) {
+        if (monsterCombat === monsterMagic) {
+          if (heroCombat > heroMagic) {
             this.currentHero.takeDamage(this.currentMonster.castSpell());
           } else {
             this.currentHero.takeDamage(this.currentMonster.executeAttack());
           }
-        } else if (
-          // this.currentMonster.getHighestStat()
-          this.currentMonster.combatEfficiency >
-          this.currentMonster.magicKnowledge
-        ) {
+        } else if (monsterCombat > monsterMagic) {
           this.currentHero.takeDamage(this.currentMonster.executeAttack());
         } else {
           this.currentHero.takeDamage(this.currentMonster.castSpell());
@@ -160,23 +205,50 @@ export default {
       } else {
         this.currentMonster.healInjures();
       }
-      if (this.currentHero.isDead()) {
-        console.log(
-          '%cYOU LOST !',
-          'color: red; font-weight: 700',
-          'the world was destroyed'
-        );
-      }
     },
   },
 };
 </script>
 
 <style lang="scss">
+@import url(https://fonts.googleapis.com/css?family=Lato:400,700,900);
+
 * {
   padding: 0;
   margin: 0;
   font-family: 'MedievalSharp', cursive;
+}
+
+body {
+  background-color: rgba(204, 216, 97, 0.2);
+}
+
+#app {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.battle__content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  padding: 50px 0;
+  gap: 20px;
+}
+
+.battle__actions-list {
+  margin-top: 50px;
+}
+
+.hero__container {
+  display: flex;
+  width: 90%;
+  padding: 50px 0;
+}
+
+.hero__actions {
+  text-align: center;
 }
 
 .slide-enter-active {
@@ -201,31 +273,21 @@ export default {
   max-height: 0;
 }
 
-#app {
-  max-width: 1000px;
-  margin: 0 auto;
+.list-move, /* apply transition to moving elements */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
 }
 
-.battle__content {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
-  padding: 50px 0;
-  border: 1px solid gray;
-  gap: 20px;
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
 }
 
-.hero__container {
-  display: flex;
-  width: 90%;
-  border: 1px solid green;
-  padding: 50px 0;
-}
-
-.hero__actions {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid red;
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.list-leave-active {
+  position: absolute;
 }
 </style>

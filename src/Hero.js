@@ -1,5 +1,5 @@
 import { Entity } from './Entity';
-import { getRandomInt } from './helpers';
+import { getRandomInt } from './helpers/helpers';
 
 export class Hero extends Entity {
   constructor(props) {

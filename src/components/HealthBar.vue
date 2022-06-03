@@ -10,12 +10,15 @@ export default {
     value: {
       type: Number,
     },
+    color: {
+      type: String,
+    },
   },
   computed: {
     healthBarStyles() {
       return {
         width: this.value + '%',
-        backgroundColor: this.value > 50 ? '#42B782' : '#CC0000',
+        backgroundColor: this.value > 50 ? this.color : '#CC0000',
       };
     },
   },

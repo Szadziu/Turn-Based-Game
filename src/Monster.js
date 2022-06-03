@@ -1,6 +1,6 @@
 import { Entity } from './Entity';
-import { RANDOM_ACTIONS_ENUM } from './constants';
-import { getRandomInt } from './helpers';
+import { RANDOM_ACTIONS_ENUM } from './cons/constants';
+import { getRandomInt } from './helpers/helpers';
 
 export class Monster extends Entity {
   constructor({ level, ...rest }) {
@@ -9,21 +9,8 @@ export class Monster extends Entity {
   }
 
   randomActionAI() {
-    console.log(
-      "%cmonster's move",
-      'background-color: coral; color: white; padding: 3px'
-    );
-
     const x = getRandomInt(0, !this.healingCooldown ? 3 : 2);
 
     return Object.values(RANDOM_ACTIONS_ENUM)[x];
-
-    // if (this.healingCooldown === 0) {
-    //   const rdm = Math.floor(Math.random() * 3);
-    //   return Object.values(RANDOM_ACTIONS_ENUM)[rdm];
-    // } else {
-    //   const rdm = Math.floor(Math.random() * 2);
-    //   return Object.values(RANDOM_ACTIONS_ENUM)[rdm];
-    // }
   }
 }

@@ -1,4 +1,4 @@
-import { getRandomInt } from './helpers';
+import { getRandomInt } from './helpers/helpers';
 
 export class Entity {
   constructor({ name, health, combatEfficiency, magicKnowledge, img }) {
@@ -17,7 +17,6 @@ export class Entity {
     const hit = Math.round((powerOfAttack * this.combatEfficiency) / 100);
     this.calcCooldowns();
 
-    console.log(`hit for ${hit}`);
     return hit;
   }
 
@@ -26,7 +25,6 @@ export class Entity {
     const spell = Math.round((powerOfMagic * this.magicKnowledge) / 100);
     this.calcCooldowns();
 
-    console.log(`cast a spell for ${spell}`);
     return spell;
   }
 
