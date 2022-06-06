@@ -61,7 +61,11 @@
 </template>
 
 <script>
-import { HALF_OF_MAX_HERO_HEALTH, RANDOM_ACTIONS_ENUM } from './cons/constants';
+import {
+  ACTIONS_ENUM,
+  HALF_OF_MAX_HERO_HEALTH,
+  RANDOM_ACTIONS_ENUM,
+} from './cons/constants';
 import { Heroes, Monsters } from './cons/entities';
 import { Hero } from './Hero';
 import { Monster } from './Monster';
@@ -155,31 +159,49 @@ export default {
     // },
 
     monsterDead() {
-      this.defeated++;
-      this.currentHero.healInjures(
-        this.currentHero.maxHealth * HALF_OF_MAX_HERO_HEALTH
-      );
+      this.defeatedMonsters++;
+      this.availableCredits += 5;
+      this.currentHero.regenerateInjures();
       this.lastActions.push(`${this.currentMonster.name} died`);
       this.lastActions.push(
-        `heal up for ${this.currentHero.maxHealth * HALF_OF_MAX_HERO_HEALTH}`
+        `Hero healed up for ${this.currentHero.regenerateInjures()}`
       );
-      this.allMonsters = this.allMonsters.filter(
-        (monster) => this.currentMonster.name !== monster.name
-      );
-      if (!this.isGame) {
-        console.log(
-          '%cYOU DID IT !',
-          'color: blue; font-weight: 700',
-          'the world was cleared'
-        );
-        return;
-      }
-      this.setCurrentMonster();
+      // this.allMonsters = this.allMonsters.filter(
+      //   (monster) => this.currentMonster.name !== monster.name
+      // );
+      return true;
     },
 
-    performAttack(attackValue) {
-      this.currentMonster.takeDamage(attackValue);
-      this.lastActions.push(`attack for ${attackValue}`);
+    heroDead() {
+      this.isGame = false;
+    },
+
+    updateHeroStats(stat) {
+      this.availableCredits--;
+      if (stat === 'currentHealth') {
+        this.setAttribute(stat, this[stat] + 3);
+      } else {
+        this.setAttribute(stat, this[stat] + 1);
+      }
+    },
+
+    heroTurn(action) {
+      if (action === ACTIONS_ENUM.MELEE) {
+        const hit = this.currentHero.executeAttack();
+        this.currentMonster.takeDamage(hit);
+        this.lastActions.push(`Hero hit for ${hit}`);
+      }
+      if (action === ACTIONS_ENUM.MAGIC) {
+        const spell = this.currentHero.castSpell();
+        this.currentMonster.takeDamage(spell);
+        this.lastActions.push(`Hero casted a spell for ${spell}`);
+      }
+      if (action === ACTIONS_ENUM.HEAL) {
+        const healing = this.healSelf();
+        this.currentHero.setHealth(healing);
+        this.lastActions.push(`Hero healed up for ${healing}`);
+      }
+
       if (this.currentMonster.isDead()) {
         this.monsterDead();
       } else {
@@ -187,45 +209,92 @@ export default {
       }
     },
 
+    monsterTurn(rdmAction) {
+      if (rdmAction === ACTIONS_ENUM.MELEE) {
+        const hit = this.currentMonster.executeAttack();
+        this.currentHero.takeDamage(hit);
+        this.lastActions.push(`Monster hit for ${hit}`);
+      }
+      if (rdmAction === ACTIONS_ENUM.MAGIC) {
+        const spell = this.currentHero.castSpell();
+        this.currentHero.takeDamage(spell);
+        this.lastActions.push(`Monster casted a spell for ${spell}`);
+      }
+      if (rdmAction === ACTIONS_ENUM.HEAL) {
+        const healing = this.healSelf();
+        this.currentMonster.setHealth(healing);
+        this.lastActions.push(`Monster healed up for ${healing}`);
+      }
+
+      if (this.currentHero.isDead()) {
+        this.isGame = false;
+      } else {
+        this.endTurn();
+      }
+    },
+
+    // performAttack(attackValue) {
+    //   this.currentMonster.takeDamage(attackValue);
+    //   this.lastActions.push(`attack for ${attackValue}`);
+    //   if (this.currentMonster.isDead()) {
+    //     this.monsterDead();
+    //   } else {
+    //     this.endTurn();
+    //   }
+    // },
+
     healSelf() {
-      this.currentHero.healInjures();
-      this.lastActions.push(
-        `heal up for ${
-          this.currentHero.currentHealth * HALF_OF_MAX_HERO_HEALTH
-        }`
-      );
-      this.endTurn();
+      const powerOfHealing = getRandomInt(10, 50);
+      const healing = Math.round((powerOfHealing * this.maxHealth) / 100);
+
+      if (this.currentHealth + healing > this.maxHealth) {
+        return this.maxHealth;
+      } else {
+        return this.currentHealth + healing;
+      }
     },
 
     endTurn() {
-      const rdmAction =
-        RANDOM_ACTIONS_ENUM[this.currentMonster.randomActionAI()];
-      this.lastActions.push(`random AI action is: ${rdmAction.toLowerCase()}`);
+      if (this.monstersPool.length === 0) {
+        this.currentMonsterLevel++;
+      }
 
-      const heroCombat = this.currentHero.combatEfficiency;
-      const monsterCombat = this.currentMonster.combatEfficiency;
-      const heroMagic = this.currentHero.magicKnowledge;
-      const monsterMagic = this.currentMonster.magicKnowledge;
-
-      if (
-        rdmAction === RANDOM_ACTIONS_ENUM.MELEE ||
-        rdmAction === RANDOM_ACTIONS_ENUM.MAGIC
-      ) {
-        if (monsterCombat === monsterMagic) {
-          if (heroCombat > heroMagic) {
-            this.currentHero.takeDamage(this.currentMonster.castSpell());
-          } else {
-            this.currentHero.takeDamage(this.currentMonster.executeAttack());
-          }
-        } else if (monsterCombat > monsterMagic) {
-          this.currentHero.takeDamage(this.currentMonster.executeAttack());
-        } else {
-          this.currentHero.takeDamage(this.currentMonster.castSpell());
-        }
+      if (this.currentTurn === 'hero') {
+        this.currentTurn = 'monster';
       } else {
-        this.currentMonster.healInjures();
+        this.currentTurn = 'hero';
       }
     },
+
+    // endTurn() {
+    //   const rdmAction =
+    //     RANDOM_ACTIONS_ENUM[this.currentMonster.randomActionAI()];
+    //   this.lastActions.push(`random AI action is: ${rdmAction.toLowerCase()}`);
+
+    //   const heroCombat = this.currentHero.combatEfficiency;
+    //   const monsterCombat = this.currentMonster.combatEfficiency;
+    //   const heroMagic = this.currentHero.magicKnowledge;
+    //   const monsterMagic = this.currentMonster.magicKnowledge;
+
+    //   if (
+    //     rdmAction === RANDOM_ACTIONS_ENUM.MELEE ||
+    //     rdmAction === RANDOM_ACTIONS_ENUM.MAGIC
+    //   ) {
+    //     if (monsterCombat === monsterMagic) {
+    //       if (heroCombat > heroMagic) {
+    //         this.currentHero.takeDamage(this.currentMonster.castSpell());
+    //       } else {
+    //         this.currentHero.takeDamage(this.currentMonster.executeAttack());
+    //       }
+    //     } else if (monsterCombat > monsterMagic) {
+    //       this.currentHero.takeDamage(this.currentMonster.executeAttack());
+    //     } else {
+    //       this.currentHero.takeDamage(this.currentMonster.castSpell());
+    //     }
+    //   } else {
+    //     this.currentMonster.healInjures();
+    //   }
+    // },
   },
 };
 </script>
