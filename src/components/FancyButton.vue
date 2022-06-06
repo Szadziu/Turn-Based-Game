@@ -21,11 +21,11 @@ export default {
   font-family: inherit;
   font-size: inherit;
   color: inherit;
+  user-select: none;
   background: none;
   cursor: pointer;
   width: $width;
   height: $height;
-  /* padding: $width $height; */
   display: inline-block;
   margin: 15px 30px;
   text-transform: uppercase;
@@ -33,23 +33,17 @@ export default {
   font-weight: 700;
   outline: none;
   position: relative;
-  -webkit-transition: all 0.3s;
-  -moz-transition: all 0.3s;
   transition: all 0.3s;
   background: $button;
   color: #fff;
   box-shadow: 0 6px $shadow, -1px 8px 0 black, 0 0 0 2px black,
     0px 6px 0px 2px black;
-  -webkit-transition: none;
-  -moz-transition: none;
   transition: none;
 
   &:after {
     content: '';
     position: absolute;
     z-index: -1;
-    -webkit-transition: all 0.3s;
-    -moz-transition: all 0.3s;
     transition: all 0.3s;
   }
 
@@ -89,8 +83,6 @@ export default {
         border-radius: 200px;
         right: 8px;
         left: auto;
-        -moz-transform: rotate(-45deg);
-        -webkit-transform: rotate(-45deg);
         transform: rotate(-45deg);
       }
     }

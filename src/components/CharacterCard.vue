@@ -1,5 +1,5 @@
 <template>
-  <div v-if="char.currentHealth" class="card" :class="{ dead: heroDead }">
+  <div class="card" :class="{ dead: heroDead }">
     <div class="card__image">
       <img :src="char.image" :alt="char.name" />
     </div>
@@ -54,7 +54,6 @@ export default {
 <style lang="scss" scoped>
 @import '@/scss/variables.scss';
 
-
 .dead {
   filter: grayscale(1);
 }
@@ -62,8 +61,7 @@ export default {
 .card {
   background: white;
   width: 300px;
-  display: inline-block;
-  margin: auto;
+  margin: 0 75px;
   border-radius: $border-radius-size + 5;
   position: relative;
   text-align: center;

@@ -8,9 +8,9 @@ export class Monster extends Entity {
     this.level = level;
   }
 
-  randomActionAI() {
-    const x = getRandomInt(0, !this.healingCooldown ? 3 : 2);
+  drawRandomAction() {
+    const rdm = getRandomInt(0, !this.getCooldown('healing') ? 3 : 2);
 
-    return Object.values(RANDOM_ACTIONS_ENUM)[x];
+    return Object.values(RANDOM_ACTIONS_ENUM)[rdm];
   }
 }

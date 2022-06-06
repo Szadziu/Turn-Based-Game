@@ -5,23 +5,22 @@ export class Hero extends Entity {
   constructor(props) {
     super(props);
 
-    this.specialAttackCooldown = 6;
+    this.setCooldown('special', 6);
   }
+
   specialAttack() {
     const powerOfAttack = getRandomInt(100, 300);
-
-    const highestSpec =
-      this.combatEfficiency > this.magicKnowledge
-        ? this.combatEfficiency
-        : this.magicKnowledge;
-
-    const special = Math.round((powerOfAttack * highestSpec) / 100);
-
-    this.calcCooldowns();
-    this.specialAttackCooldown = 6;
-
-    console.log(`hit special attack for ${special}`);
+    const special = Math.round((powerOfAttack * this.getHighestSpec()) / 100);
 
     return special;
+  }
+
+  regenerateInjures() {
+    //* zapis połowy max hp można napewno lepiej zapisać
+    if (this.currentHealth + this.maxHealth * 0.5 > this.maxHealth) {
+      this.setHealth(this.maxHealth);
+    } else {
+      this.setHealth(this.currentHealth + this.maxHealth * 0.5);
+    }
   }
 }

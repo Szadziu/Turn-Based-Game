@@ -1,49 +1,50 @@
 <template>
   <div id="app">
     <transition name="slide" mode="out-in" appear>
-      <div v-if="!isGame">
+      <div class="menu__choose-hero" v-if="!isGame">
         <FancyButton
-          v-for="(hero, i) in allHeroes"
+          v-for="(hero, i) in heroesPool"
           :key="i"
-          @click="chooseHero(i + 1)"
+          @click="startGame(i + 1)"
           :class="`hero--${hero.name}`"
           >{{ hero.name }}</FancyButton
         >
       </div>
     </transition>
-    <div class="battle__content">
-      <div class="hero__container">
+    <div class="battle__container">
+      <div class="battle__characters-container">
         <CharacterCard :char="currentHero" />
         <CharacterCard :char="currentMonster" />
       </div>
-      <div class="hero__actions" v-if="isGame">
-        <FancyButton
-          @click="performAttack(currentHero.executeAttack())"
-          :class="'character--attack'"
-        >
-          attack
-        </FancyButton>
-        <FancyButton
-          @click="performAttack(currentHero.castSpell())"
-          :class="'character--spell'"
-        >
-          cast spell
-        </FancyButton>
-        <FancyButton
-          :disabled="currentHero.healingCooldown || false"
-          @click="healSelf()"
-          :class="'character--heal'"
-        >
-          heal{{ healCooldown }}
-        </FancyButton>
-        <FancyButton
-          @click="performAttack(currentHero.specialAttack())"
-          :disabled="currentHero.specialAttackCooldown || false"
-          :class="'character--special'"
-        >
-          special attack{{ specialCooldown }}
-        </FancyButton>
-
+      <div v-if="isGame" class="battle__actions-container">
+        <div class="battle__hero-actions">
+          <FancyButton
+            @click="performAttack(currentHero.executeAttack())"
+            :class="'character--attack'"
+          >
+            attack
+          </FancyButton>
+          <FancyButton
+            @click="performAttack(currentHero.castSpell())"
+            :class="'character--spell'"
+          >
+            cast spell
+          </FancyButton>
+          <FancyButton
+            :disabled="currentHero.healingCooldown || false"
+            @click="healSelf()"
+            :class="'character--heal'"
+          >
+            heal{{ healCooldown }}
+          </FancyButton>
+          <FancyButton
+            @click="performAttack(currentHero.specialAttack())"
+            :disabled="currentHero.specialAttackCooldown || false"
+            :class="'character--special'"
+          >
+            special attack{{ specialCooldown }}
+          </FancyButton>
+        </div>
         <TransitionGroup name="list" tag="ul" class="battle__actions-list">
           <li v-for="(action, i) in lastActions" :key="i">{{ action }}</li>
         </TransitionGroup>
@@ -72,67 +73,86 @@ export default {
   name: 'App',
   data() {
     return {
-      currentHero: '',
-      currentMonster: '',
-      allHeroes: Heroes,
-      allMonsters: [''],
-      defeated: 0,
+      currentHero: null,
+      currentMonster: null,
+      heroesPool: Heroes,
+      currentMonsterLevel: 1,
+      // monstersPool: [''],
+      defeatedMonsters: 0,
       lastActions: [],
-      skillPoints: 0,
+      availableCredits: 0,
+      isGame: false,
+      currentTurn: '', //* hero/monster
     };
   },
-  watch: {
-    lastActions() {
-      if (this.lastActions.length > 3) {
-        this.lastActions.shift();
-      }
-    },
-  },
+  // watch: {
+  //   lastActions() {
+  //     if (this.lastActions.length > 5) {
+  //       this.lastActions.shift();
+  //     }
+  //   },
+  // },
   components: {
     CharacterCard,
     FancyButton,
   },
   computed: {
-    isGame() {
-      return !!this.allMonsters.length && this.currentHero.currentHealth >= 0;
-    },
-    isResults() {
-      return (
-        this.currentHero.currentHealth <= 0 || this.allMonsters.length === 0
+    monstersPool() {
+      return Monsters.filter(
+        (monster) => monster.level === this.currentMonsterLevel
       );
     },
-    healCooldown() {
-      return this.currentHero.healingCooldown
-        ? '(' + this.currentHero.healingCooldown + ')'
-        : '';
-    },
-    specialCooldown() {
-      return this.currentHero.specialAttackCooldown
-        ? '(' + this.currentHero.specialAttackCooldown + ')'
-        : '';
-    },
   },
+
+  //   isGame() {
+  //     return !!this.allMonsters.length && this.currentHero.currentHealth >= 0;
+  //   },
+  //   isResults() {
+  //     return (
+  //       this.currentHero.currentHealth <= 0 || this.allMonsters.length === 0
+  //     );
+  //   },
+  //   healCooldown() {
+  //     return this.currentHero.healingCooldown
+  //       ? '(' + this.currentHero.healingCooldown + ')'
+  //       : '';
+  //   },
+  //   specialCooldown() {
+  //     return this.currentHero.specialAttackCooldown
+  //       ? '(' + this.currentHero.specialAttackCooldown + ')'
+  //       : '';
+  //   },
   methods: {
-    chooseHero(hero) {
-      this.allMonsters = Monsters;
-      this.createHero(hero);
-      this.setCurrentMonster();
-      this.resetStats();
-    },
-
-    resetStats() {
-      this.defeated = 0;
-      this.lastActions = [];
-    },
-
-    setCurrentMonster() {
-      const random = getRandomInt(0, this.allMonsters.length);
-      this.currentMonster = new Monster(this.allMonsters[random]);
-    },
-
     createHero(index) {
       this.currentHero = new Hero(Heroes[index - 1]);
     },
+
+    createMonster() {
+      const rdm = getRandomInt(0, this.monstersPool.length);
+      this.currentMonster = new Monster(this.monstersPool[rdm]);
+    },
+
+    startGame(i) {
+      this.resetGame();
+      this.createHero(i);
+      this.createMonster();
+    },
+
+    resetGame() {
+      this.defeatedMonsters = 0;
+      this.lastActions = [];
+      this.currentHero = null;
+      this.currentMonster = null;
+      this.currentMonsterLevel = 1;
+      this.isGame = true;
+    },
+
+    // chooseHero(hero) {
+    //   this.allMonsters = Monsters;
+    //   this.createHero(hero);
+    //   this.setCurrentMonster();
+    //   this.resetStats();
+    // },
 
     monsterDead() {
       this.defeated++;
@@ -228,27 +248,42 @@ body {
   margin: 0 auto;
 }
 
-.battle__content {
+.battle__container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
   align-items: center;
+
   padding: 50px 0;
   gap: 20px;
 }
 
 .battle__actions-list {
-  margin-top: 50px;
+  margin: auto 75px;
+  width: 300px;
+  list-style-type: none;
+  & li {
+    font-size: 20px;
+    margin: 20px 0;
+  }
 }
 
-.hero__container {
+.battle__characters-container,
+.battle__actions-container {
   display: flex;
   width: 90%;
   padding: 50px 0;
 }
 
-.hero__actions {
+.battle__hero-actions {
+  width: 300px;
+  margin: 0 75px;
+}
+
+.battle__results {
+  width: 100%;
   text-align: center;
+  font-size: 20px;
+  line-height: 24px;
 }
 
 .slide-enter-active {
@@ -273,7 +308,7 @@ body {
   max-height: 0;
 }
 
-.list-move, /* apply transition to moving elements */
+.list-move,
 .list-enter-active,
 .list-leave-active {
   transition: all 0.5s ease;
@@ -285,8 +320,6 @@ body {
   transform: translateX(30px);
 }
 
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
 .list-leave-active {
   position: absolute;
 }
