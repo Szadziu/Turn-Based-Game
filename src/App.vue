@@ -76,7 +76,7 @@ export default {
       lastActions: [],
       availableCredits: 0,
       isGame: false,
-      currentTurn: 'hero', //* hero/monster
+      currentTurn: 'hero',
     };
   },
 
@@ -145,25 +145,51 @@ export default {
       }
     },
 
+    isAttackBlocked(character, type) {
+      const chance = character.blockChance(type);
+      const probability = getRandomInt(0, 100 + chance);
+
+      if (probability < chance) {
+        this.lastActions.push(`Monster blocked attack`);
+        console.log(`block chance ${chance}%`);
+        return true;
+      }
+    },
+
     heroTurn(action) {
       if (action === ACTIONS_ENUM.MELEE) {
         const hit = this.currentHero.executeAttack();
+
+        if (this.isAttackBlocked(this.currentMonster, 'combatEfficiency'))
+          this.monsterTurn(this.currentMonster.drawRandomAction());
+
         this.currentMonster.takeDamage(hit);
         this.lastActions.push(`Hero hit for ${hit}`);
       }
+
       if (action === ACTIONS_ENUM.MAGIC) {
         const spell = this.currentHero.castSpell();
+
+        if (this.isAttackBlocked(this.currentMonster, 'magicKnowledge'))
+          this.monsterTurn(this.currentMonster.drawRandomAction());
+
         this.currentMonster.takeDamage(spell);
         this.lastActions.push(`Hero casted a spell for ${spell}`);
       }
+
       if (action === ACTIONS_ENUM.HEAL) {
         const healing = this.currentHero.healSelf();
         this.currentHero.setHealth(healing);
         this.lastActions.push(`Hero healed up`);
         this.currentHero.setCooldown('healing', 3);
       }
+
       if (action === ACTIONS_ENUM.SPECIAL) {
         const special = this.currentHero.specialAttack();
+
+        if (this.isAttackBlocked(this.currentMonster, 'specialAttack'))
+          this.monsterTurn(this.currentMonster.drawRandomAction());
+
         this.currentMonster.takeDamage(special);
         this.lastActions.push(`Hero use special attack for ${special}`);
         this.currentHero.setCooldown('special', 7);
@@ -191,16 +217,32 @@ export default {
         const spell = this.currentHero.castSpell();
         if (monsterDualSpecialization) {
           if (heroCombat > heroMagic) {
+            if (this.isAttackBlocked(this.currentHero, 'magicKnowledge')) {
+              this.endTurn();
+              return;
+            }
             this.currentHero.takeDamage(spell);
             this.lastActions.push(`Monster casted a spell for ${spell}`);
           } else {
+            if (this.isAttackBlocked(this.currentHero, 'combatEfficiency')) {
+              this.endTurn();
+              return;
+            }
             this.currentHero.takeDamage(hit);
             this.lastActions.push(`Monster hit for ${hit}`);
           }
         } else if (monsterCombat > monsterMagic) {
           this.currentHero.takeDamage(hit);
+          if (this.isAttackBlocked(this.currentHero, 'combatEfficiency')) {
+            this.endTurn();
+            return;
+          }
           this.lastActions.push(`Monster hit for ${hit}`);
         } else {
+          if (this.isAttackBlocked(this.currentHero, 'magicKnowledge')) {
+            this.endTurn();
+            return;
+          }
           this.currentHero.takeDamage(spell);
           this.lastActions.push(`Monster casted a spell for ${spell}`);
         }
@@ -289,6 +331,7 @@ body {
 }
 
 .battle__actions-list {
+  padding: 10px;
   margin: auto 75px;
   width: 300px;
   height: 250px;

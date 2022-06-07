@@ -44,6 +44,10 @@ export class Entity {
     this[attr] = value;
   }
 
+  getAttribute(attr) {
+    return this[attr];
+  }
+
   setHealth(value) {
     this.currentHealth = value;
   }
@@ -68,9 +72,9 @@ export class Entity {
     return this.cooldows[name];
   }
 
-  blockAttack(type) {
+  blockChance(type) {
     //* tylko testowo
-    return type === this.getHighestSpec();
+    return this.getAttribute(type) / 4;
   }
 
   // healInjures(value) {
