@@ -14,18 +14,32 @@
     <div class="battle__container">
       <div class="battle__characters-container" v-if="isGame">
         <CharacterCard :char="currentHero" />
+        <div class="block" v-if="currentTurn === 'hero' && blocked">
+          <img class="block__img" src="./assets/shield.png" alt="shield" />
+        </div>
         <CharacterCard :char="currentMonster" />
+        <div class="block" v-if="currentTurn === 'monster' && blocked">
+          <img class="block__img" src="./assets/shield.png" alt="shield" />
+        </div>
       </div>
       <div v-if="isGame" class="battle__actions-container">
         <div class="battle__hero-actions">
-          <FancyButton @click="heroTurn('MELEE')" :class="'character--attack'">
+          <FancyButton
+            @click="heroTurn('MELEE')"
+            :disabled="blocked"
+            :class="'character--attack'"
+          >
             attack
           </FancyButton>
-          <FancyButton @click="heroTurn('MAGIC')" :class="'character--spell'">
+          <FancyButton
+            @click="heroTurn('MAGIC')"
+            :disabled="blocked"
+            :class="'character--spell'"
+          >
             cast spell
           </FancyButton>
           <FancyButton
-            :disabled="currentHero.getCooldown('healing') > 0"
+            :disabled="currentHero.getCooldown('healing') > 0 || blocked"
             @click="heroTurn('HEAL')"
             :class="'character--heal'"
           >
@@ -33,7 +47,7 @@
           </FancyButton>
           <FancyButton
             @click="heroTurn('SPECIAL')"
-            :disabled="currentHero.getCooldown('special') > 0"
+            :disabled="currentHero.getCooldown('special') > 0 || blocked"
             :class="'character--special'"
           >
             special attack({{ currentHero.getCooldown('special') }})
@@ -77,6 +91,7 @@ export default {
       availableCredits: 0,
       isGame: false,
       currentTurn: 'hero',
+      blocked: false,
     };
   },
 
@@ -152,6 +167,8 @@ export default {
       if (probability < chance) {
         this.lastActions.push(`Monster blocked attack`);
         console.log(`block chance ${chance}%`);
+        this.blocked = true;
+        setTimeout(() => (this.blocked = false), 1000);
         return true;
       }
     },
@@ -200,6 +217,7 @@ export default {
       } else {
         this.monsterTurn(this.currentMonster.drawRandomAction());
       }
+      this.toggleTurn();
     },
 
     monsterTurn(rdmAction) {
@@ -208,7 +226,6 @@ export default {
       const heroMagic = this.currentHero.magicKnowledge;
       const monsterMagic = this.currentMonster.magicKnowledge;
       const monsterDualSpecialization = monsterCombat === monsterMagic;
-
       if (
         rdmAction === ACTIONS_ENUM.MELEE ||
         rdmAction === ACTIONS_ENUM.MAGIC
@@ -260,6 +277,14 @@ export default {
       }
     },
 
+    toggleTurn() {
+      if (this.currentTurn === 'hero') {
+        this.currentTurn = 'monster';
+      } else {
+        this.currentTurn = 'hero';
+      }
+    },
+
     endTurn() {
       if (this.allMonsters.length === 0) {
         this.isGame = false;
@@ -270,11 +295,7 @@ export default {
         this.currentMonsterLevel++;
       }
 
-      if (this.currentTurn === 'hero') {
-        this.currentTurn = 'monster';
-      } else {
-        this.currentTurn = 'hero';
-      }
+      this.toggleTurn();
 
       if (this.currentHero.getCooldown('healing') > 0) {
         this.currentHero.setCooldown(
@@ -319,6 +340,19 @@ body {
 #app {
   max-width: 1000px;
   margin: 0 auto;
+}
+
+.block {
+  position: relative;
+
+  &__img {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    right: 50%;
+    top: 80%;
+    z-index: 999;
+  }
 }
 
 .battle__container {
