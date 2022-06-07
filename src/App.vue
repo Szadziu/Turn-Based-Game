@@ -61,20 +61,42 @@
         >+</FancyButton
       >
 
-      <div v-if="isCreditsManagerOpen" class="creditsManager">
-        <button @click="toggleCreditsManager()">X</button>
-        credit manager
+      <div v-if="isCreditsManagerOpen" class="credits-manager">
+        <FancyButton class="close" @click="toggleCreditsManager()">
+          X
+        </FancyButton>
+        <p class="credits-manager__feature credits-manager__title">
+          Available credits: {{ availableCredits }} points
+        </p>
+        <div class="credits-manager__feature">
+          <span class="credits-manager__feature-item"> Combat Efficiency </span>
 
-        <p>available credits: {{ availableCredits }} points</p>
+          <span class="credits-manager__feature-item"> Magic Knowledge </span>
 
-        <p>combat</p>
-        <button @click="updateHeroStats('combatEfficiency')">+1</button>
+          <span class="credits-manager__feature-item"> Health </span>
+        </div>
+        <div class="credits-manager__feature">
+          <FancyButton
+            class="update-stats"
+            @click="updateHeroStats('combatEfficiency')"
+          >
+            +1
+          </FancyButton>
 
-        <p>magic</p>
-        <button @click="updateHeroStats('magicKnowledge')">+1</button>
+          <FancyButton
+            class="update-stats"
+            @click="updateHeroStats('magicKnowledge')"
+          >
+            +1
+          </FancyButton>
 
-        <p>health</p>
-        <button @click="updateHeroStats('currentHealth')">+3</button>
+          <FancyButton
+            class="update-stats"
+            @click="updateHeroStats('currentHealth')"
+          >
+            +3
+          </FancyButton>
+        </div>
       </div>
     </div>
 
@@ -113,6 +135,7 @@ export default {
       currentTurn: 'hero',
       blocked: false,
       isCreditsManagerOpen: false,
+      actionList: null,
     };
   },
 
@@ -374,14 +397,42 @@ body {
   margin: 0 auto;
 }
 
-.creditsManager {
+.btn {
+  padding: 5px;
+}
+
+.credits-manager {
+  user-select: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
   position: absolute;
-  bottom: 50px;
-  left: 5%;
+  bottom: 30px;
+  left: calc(5% - 20px);
   background-color: orangered;
+  border-radius: 14px;
+  box-shadow: 0 0 3px 2px black;
+  padding: 20px;
+  font-size: 24px;
   color: white;
   width: 90%;
   height: 400px;
+
+  &__title {
+    font-size: 44px;
+  }
+
+  &__feature {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    text-align: center;
+
+    &-item {
+      width: 30%;
+    }
+  }
 }
 
 .block {
@@ -422,7 +473,7 @@ body {
 .battle__actions-container {
   display: flex;
   width: 90%;
-  padding: 50px 0;
+  padding-top: 50px;
 }
 
 .battle__hero-actions {

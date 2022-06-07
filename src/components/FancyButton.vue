@@ -89,8 +89,16 @@ export default {
   }
 }
 
-.skills {
-  @include fancy-btn(#ae6a06, #ffbd21, #fe8d0a, 20px, 20px);
+.skills,
+.update-stats {
+  @include fancy-btn(#ae6a06, #ffbd21, #fe8d0a, 80px, 50px);
+  font-size: 20px;
+  color: black;
+  padding: 5px;
+}
+
+.close {
+  @include fancy-btn(#ce361b, #640632, #daddbb, 30px, 30px);
 }
 
 .hero--viking {
