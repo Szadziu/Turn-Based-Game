@@ -80,7 +80,7 @@ export const Monsters = [
   {
     id: '_m2',
     name: 'goblin',
-    level: 1,
+    level: 2,
     health: 18,
     combatEfficiency: 4,
     magicKnowledge: 4,
@@ -98,7 +98,7 @@ export const Monsters = [
   {
     id: '_m4',
     name: 'ogre',
-    level: 1,
+    level: 3,
     health: 30,
     combatEfficiency: 3,
     magicKnowledge: 2,
@@ -107,7 +107,7 @@ export const Monsters = [
   {
     id: '_m5',
     name: 'troll',
-    level: 1,
+    level: 2,
     health: 35,
     combatEfficiency: 13,
     magicKnowledge: 11,
@@ -116,7 +116,7 @@ export const Monsters = [
   {
     id: '_m6',
     name: 'dragon',
-    level: 1,
+    level: 4,
     health: 50,
     combatEfficiency: 15,
     magicKnowledge: 15,
@@ -125,7 +125,7 @@ export const Monsters = [
   {
     id: '_m7',
     name: 'giant',
-    level: 1,
+    level: 5,
     health: 40,
     combatEfficiency: 30,
     magicKnowledge: 1,
@@ -134,7 +134,7 @@ export const Monsters = [
   {
     id: '_m8',
     name: 'reaper',
-    level: 1,
+    level: 5,
     health: 22,
     combatEfficiency: 8,
     magicKnowledge: 25,
@@ -143,7 +143,7 @@ export const Monsters = [
   {
     id: '_m9',
     name: 'harpy',
-    level: 1,
+    level: 3,
     health: 36,
     combatEfficiency: 12,
     magicKnowledge: 12,
@@ -152,7 +152,7 @@ export const Monsters = [
   {
     id: '_m10',
     name: 'vampire',
-    level: 1,
+    level: 4,
     health: 66,
     combatEfficiency: 9,
     magicKnowledge: 11,

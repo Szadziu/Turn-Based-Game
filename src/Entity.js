@@ -29,6 +29,17 @@ export class Entity {
     return spell;
   }
 
+  healSelf() {
+    const powerOfHealing = getRandomInt(10, 50);
+    const healing = Math.round((powerOfHealing * this.maxHealth) / 100);
+
+    if (this.currentHealth + healing > this.maxHealth) {
+      return this.maxHealth;
+    } else {
+      return this.currentHealth + healing;
+    }
+  }
+
   setAttribute(attr, value) {
     this[attr] = value;
   }

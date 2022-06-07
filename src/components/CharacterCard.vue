@@ -1,6 +1,6 @@
 <template>
-  <div class="card" :class="{ dead: heroDead }">
-    <div class="card__image">
+  <div class="card">
+    <div class="card__image" :class="{ dead: heroDead }">
       <img :src="char.image" :alt="char.name" />
     </div>
 

@@ -1,5 +1,5 @@
 import { Entity } from './Entity';
-import { RANDOM_ACTIONS_ENUM } from './cons/constants';
+import { ACTIONS_ENUM } from './cons/constants';
 import { getRandomInt } from './helpers/helpers';
 
 export class Monster extends Entity {
@@ -11,6 +11,6 @@ export class Monster extends Entity {
   drawRandomAction() {
     const rdm = getRandomInt(0, !this.getCooldown('healing') ? 3 : 2);
 
-    return Object.values(RANDOM_ACTIONS_ENUM)[rdm];
+    return Object.values(ACTIONS_ENUM)[rdm];
   }
 }
