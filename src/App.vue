@@ -60,13 +60,7 @@
       <FancyButton class="skills" @click="toggleCreditsManager()" v-if="isGame"
         >+</FancyButton
       >
-      <div v-if="currentHero.currentHealth < 0" class="battle__results">
-        Results: Defeated monsters: {{ defeatedMonsters }}
-        <p v-if="currentHero.currentHealth > 0">
-          Congratulations you defeated all monsters !
-        </p>
-        <p v-else>Oh no... You lose. Maybe try again ?</p>
-      </div>
+
       <div v-if="isCreditsManagerOpen" class="creditsManager">
         <button @click="toggleCreditsManager()">X</button>
         credit manager
@@ -82,6 +76,14 @@
         <p>health</p>
         <button @click="updateHeroStats('currentHealth')">+3</button>
       </div>
+    </div>
+
+    <div v-if="!isGame && currentHero" class="battle__results">
+      Results: Defeated monsters: {{ defeatedMonsters }}
+      <p v-if="currentHero.currentHealth > 0">
+        Congratulations you defeated all monsters !
+      </p>
+      <p v-else>Oh no... You lose. Maybe try again ?</p>
     </div>
   </div>
 </template>
@@ -429,10 +431,14 @@ body {
 }
 
 .battle__results {
-  width: 100%;
+  width: 60%;
+  padding: 70px 0;
+  margin: 100px auto;
   text-align: center;
-  font-size: 20px;
+  font-size: 26px;
   line-height: 24px;
+  border: 1px solid gray;
+  background-color: rgb(145, 226, 236);
 }
 
 .slide-enter-active {
