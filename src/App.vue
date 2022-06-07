@@ -57,12 +57,30 @@
           <li v-for="(action, i) in lastActions" :key="i">{{ action }}</li>
         </TransitionGroup>
       </div>
+      <FancyButton class="skills" @click="toggleCreditsManager()" v-if="isGame"
+        >+</FancyButton
+      >
       <div v-if="currentHero.currentHealth < 0" class="battle__results">
         Results: Defeated monsters: {{ defeatedMonsters }}
         <p v-if="currentHero.currentHealth > 0">
           Congratulations you defeated all monsters !
         </p>
         <p v-else>Oh no... You lose. Maybe try again ?</p>
+      </div>
+      <div v-if="isCreditsManagerOpen" class="creditsManager">
+        <button @click="toggleCreditsManager()">X</button>
+        credit manager
+
+        <p>available credits: {{ availableCredits }} points</p>
+
+        <p>combat</p>
+        <button @click="updateHeroStats('combatEfficiency')">+1</button>
+
+        <p>magic</p>
+        <button @click="updateHeroStats('magicKnowledge')">+1</button>
+
+        <p>health</p>
+        <button @click="updateHeroStats('currentHealth')">+3</button>
       </div>
     </div>
   </div>
@@ -92,6 +110,7 @@ export default {
       isGame: false,
       currentTurn: 'hero',
       blocked: false,
+      isCreditsManagerOpen: false,
     };
   },
 
@@ -125,12 +144,17 @@ export default {
 
     resetGame() {
       this.defeatedMonsters = 0;
+      this.availableCredits = 0;
       this.lastActions = [];
       this.currentHero = '';
       this.currentMonster = '';
       this.currentMonsterLevel = 1;
       this.allMonsters = Monsters;
       this.isGame = true;
+    },
+
+    toggleCreditsManager() {
+      this.isCreditsManagerOpen = !this.isCreditsManagerOpen;
     },
 
     monsterDead() {
@@ -152,11 +176,17 @@ export default {
     },
 
     updateHeroStats(stat) {
-      this.availableCredits--;
-      if (stat === 'currentHealth') {
-        this.setAttribute(stat, this[stat] + 3);
-      } else {
-        this.setAttribute(stat, this[stat] + 1);
+      if (this.availableCredits > 0) {
+        this.availableCredits--;
+        if (stat === 'currentHealth') {
+          this.currentHero.setHealth(this.currentHero[stat] + 3);
+          this.currentHero.setAttribute(
+            'maxHealth',
+            this.currentHero.maxHealth + 3
+          );
+        } else {
+          this.currentHero.setAttribute(stat, this.currentHero[stat] + 1);
+        }
       }
     },
 
@@ -165,7 +195,7 @@ export default {
       const probability = getRandomInt(0, 100 + chance);
 
       if (probability < chance) {
-        this.lastActions.push(`Monster blocked attack`);
+        this.lastActions.push(`${character.name} blocked attack`);
         console.log(`block chance ${chance}%`);
         this.blocked = true;
         setTimeout(() => (this.blocked = false), 1000);
@@ -342,6 +372,16 @@ body {
   margin: 0 auto;
 }
 
+.creditsManager {
+  position: absolute;
+  bottom: 50px;
+  left: 5%;
+  background-color: orangered;
+  color: white;
+  width: 90%;
+  height: 400px;
+}
+
 .block {
   position: relative;
 
@@ -359,8 +399,6 @@ body {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-
-  padding: 50px 0;
   gap: 20px;
 }
 

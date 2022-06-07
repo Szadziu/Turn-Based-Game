@@ -89,6 +89,10 @@ export default {
   }
 }
 
+.skills {
+  @include fancy-btn(#ae6a06, #ffbd21, #fe8d0a, 20px, 20px);
+}
+
 .hero--viking {
   @include fancy-btn(#ae6a06, #ffbd21, #fe8d0a, 220px, 50px);
 }
