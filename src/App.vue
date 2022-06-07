@@ -1,23 +1,30 @@
 <template>
   <div id="app">
-    <transition name="slide" mode="out-in" appear>
-      <div class="menu__choose-hero" v-if="!isGame">
-        <FancyButton
-          v-for="(hero, i) in heroesPool"
-          :key="i"
-          @click="startGame(i + 1)"
-          :class="`hero--${hero.name}`"
-          >{{ hero.name }}</FancyButton
-        >
-      </div>
-    </transition>
+    <div
+      class="menu__choose-hero animate__animated animate__slideInDown"
+      v-if="!isGame"
+    >
+      <FancyButton
+        v-for="(hero, i) in heroesPool"
+        :key="i"
+        @click="startGame(i + 1)"
+        :class="`hero--${hero.name}`"
+      >
+        {{ hero.name }}
+      </FancyButton>
+    </div>
     <div class="battle__container">
       <div class="battle__characters-container" v-if="isGame">
-        <CharacterCard :char="currentHero" />
+        <CharacterCard :char="currentHero" ref="hero" />
         <div class="block" v-if="currentTurn === 'hero' && blocked">
           <img class="block__img" src="./assets/shield.png" alt="shield" />
         </div>
-        <CharacterCard :char="currentMonster" />
+        <CharacterCard
+          :char="currentMonster"
+          ref="monster"
+          class="animate__animated"
+          :class="{ animate__wobble: actionAnimationFlag }"
+        />
         <div class="block" v-if="currentTurn === 'monster' && blocked">
           <img class="block__img" src="./assets/shield.png" alt="shield" />
         </div>
@@ -53,54 +60,70 @@
             special attack({{ currentHero.getCooldown('special') }})
           </FancyButton>
         </div>
-        <TransitionGroup name="list" tag="ul" class="battle__actions-list">
-          <li v-for="(action, i) in lastActions" :key="i">{{ action }}</li>
+        <TransitionGroup tag="ul" class="battle__actions-list">
+          <li
+            class="animate__animated animate__fadeInUp"
+            v-for="action in lastActions"
+            :key="action"
+          >
+            {{ action }}
+          </li>
         </TransitionGroup>
+        <FancyButton
+          :disabled="!availableCredits"
+          class="skills"
+          @click="toggleCreditsManager()"
+          v-if="isGame"
+          >+</FancyButton
+        >
       </div>
-      <FancyButton class="skills" @click="toggleCreditsManager()" v-if="isGame"
-        >+</FancyButton
-      >
+      <transition name="bounce" appear>
+        <div v-if="isCreditsManagerOpen" class="credits-manager">
+          <FancyButton class="close" @click="toggleCreditsManager()">
+            X
+          </FancyButton>
+          <p class="credits-manager__feature credits-manager__title">
+            Available credits: {{ availableCredits }} points
+          </p>
+          <div class="credits-manager__feature">
+            <span class="credits-manager__feature-item">
+              Combat Efficiency
+            </span>
 
-      <div v-if="isCreditsManagerOpen" class="credits-manager">
-        <FancyButton class="close" @click="toggleCreditsManager()">
-          X
-        </FancyButton>
-        <p class="credits-manager__feature credits-manager__title">
-          Available credits: {{ availableCredits }} points
-        </p>
-        <div class="credits-manager__feature">
-          <span class="credits-manager__feature-item"> Combat Efficiency </span>
+            <span class="credits-manager__feature-item"> Magic Knowledge </span>
 
-          <span class="credits-manager__feature-item"> Magic Knowledge </span>
+            <span class="credits-manager__feature-item"> Health </span>
+          </div>
+          <div class="credits-manager__feature">
+            <FancyButton
+              class="update-stats"
+              @click="updateHeroStats('combatEfficiency')"
+            >
+              +1
+            </FancyButton>
 
-          <span class="credits-manager__feature-item"> Health </span>
+            <FancyButton
+              class="update-stats"
+              @click="updateHeroStats('magicKnowledge')"
+            >
+              +1
+            </FancyButton>
+
+            <FancyButton
+              class="update-stats"
+              @click="updateHeroStats('currentHealth')"
+            >
+              +3
+            </FancyButton>
+          </div>
         </div>
-        <div class="credits-manager__feature">
-          <FancyButton
-            class="update-stats"
-            @click="updateHeroStats('combatEfficiency')"
-          >
-            +1
-          </FancyButton>
-
-          <FancyButton
-            class="update-stats"
-            @click="updateHeroStats('magicKnowledge')"
-          >
-            +1
-          </FancyButton>
-
-          <FancyButton
-            class="update-stats"
-            @click="updateHeroStats('currentHealth')"
-          >
-            +3
-          </FancyButton>
-        </div>
-      </div>
+      </transition>
     </div>
 
-    <div v-if="!isGame && currentHero" class="battle__results">
+    <div
+      v-if="!isGame && currentHero"
+      class="battle__results animate__animated animate__rubberBand"
+    >
       Results: Defeated monsters: {{ defeatedMonsters }}
       <p v-if="currentHero.currentHealth > 0">
         Congratulations you defeated all monsters !
@@ -118,6 +141,7 @@ import { Monster } from './Monster';
 import CharacterCard from './components/CharacterCard.vue';
 import FancyButton from './components/FancyButton.vue';
 import { getRandomInt } from './helpers/helpers';
+import { sounds } from './cons/sounds';
 
 export default {
   name: 'App',
@@ -136,6 +160,7 @@ export default {
       blocked: false,
       isCreditsManagerOpen: false,
       actionList: null,
+      actionAnimationFlag: false,
     };
   },
 
@@ -148,6 +173,11 @@ export default {
       return this.allMonsters.filter(
         (monster) => monster.level === this.currentMonsterLevel
       );
+
+      // return this.allMonsters
+      //   .filter((monster) => monster.level === this.currentMonsterLevel)
+      //   .sort(() => Math.random() - 0.5)
+      //   .slice(0, 1);
     },
   },
 
@@ -186,8 +216,9 @@ export default {
       this.defeatedMonsters++;
       this.availableCredits += 5;
       this.currentHero.regenerateInjures();
-      this.lastActions.push(`${this.currentMonster.name} died`);
-      this.lastActions.push(`Hero regenerated`);
+      this.lastActions.unshift(`${this.currentMonster.name} died`);
+      this.lastActions.unshift(`Hero regenerated`);
+
       this.allMonsters = this.allMonsters.filter(
         (monster) => this.currentMonster.name !== monster.name
       );
@@ -197,6 +228,8 @@ export default {
     },
 
     heroDead() {
+      const audioDead = new Audio(sounds.dead);
+      audioDead.play();
       this.isGame = false;
     },
 
@@ -220,7 +253,7 @@ export default {
       const probability = getRandomInt(0, 100 + chance);
 
       if (probability < chance) {
-        this.lastActions.push(`${character.name} blocked attack`);
+        this.lastActions.unshift(`${character.name} blocked attack`);
         console.log(`block chance ${chance}%`);
         this.blocked = true;
         setTimeout(() => (this.blocked = false), 1000);
@@ -228,7 +261,22 @@ export default {
       }
     },
 
+    toggleActionsAnimation() {
+      this.actionAnimationFlag = true;
+      setTimeout(() => {
+        this.actionAnimationFlag = false;
+      }, 500);
+      // setTimeout(
+      //   () => this.$refs.monster.$el.classList.remove('animate__wobble'),
+      //   500
+      // );
+    },
+
     heroTurn(action) {
+      const audioSword = new Audio(sounds.sword);
+
+      // this.$refs.monster.$el.classList.add('animate__animated');
+
       if (action === ACTIONS_ENUM.MELEE) {
         const hit = this.currentHero.executeAttack();
 
@@ -236,7 +284,11 @@ export default {
           this.monsterTurn(this.currentMonster.drawRandomAction());
 
         this.currentMonster.takeDamage(hit);
-        this.lastActions.push(`Hero hit for ${hit}`);
+        this.lastActions.unshift(`Hero hit for ${hit}`);
+
+        audioSword.play();
+        // this.$refs.monster.$el.classList.add('animate__wobble');
+        this.toggleActionsAnimation();
       }
 
       if (action === ACTIONS_ENUM.MAGIC) {
@@ -246,13 +298,14 @@ export default {
           this.monsterTurn(this.currentMonster.drawRandomAction());
 
         this.currentMonster.takeDamage(spell);
-        this.lastActions.push(`Hero casted a spell for ${spell}`);
+        this.lastActions.unshift(`Hero casted a spell for ${spell}`);
+        // this.$refs.monster.$el.classList.add('animate__wobble');
       }
 
       if (action === ACTIONS_ENUM.HEAL) {
         const healing = this.currentHero.healSelf();
         this.currentHero.setHealth(healing);
-        this.lastActions.push(`Hero healed up`);
+        this.lastActions.unshift(`Hero healed up`);
         this.currentHero.setCooldown('healing', 3);
       }
 
@@ -263,7 +316,7 @@ export default {
           this.monsterTurn(this.currentMonster.drawRandomAction());
 
         this.currentMonster.takeDamage(special);
-        this.lastActions.push(`Hero use special attack for ${special}`);
+        this.lastActions.unshift(`Hero use special attack for ${special}`);
         this.currentHero.setCooldown('special', 7);
       }
 
@@ -294,14 +347,14 @@ export default {
               return;
             }
             this.currentHero.takeDamage(spell);
-            this.lastActions.push(`Monster casted a spell for ${spell}`);
+            this.lastActions.unshift(`Monster casted a spell for ${spell}`);
           } else {
             if (this.isAttackBlocked(this.currentHero, 'combatEfficiency')) {
               this.endTurn();
               return;
             }
             this.currentHero.takeDamage(hit);
-            this.lastActions.push(`Monster hit for ${hit}`);
+            this.lastActions.unshift(`Monster hit for ${hit}`);
           }
         } else if (monsterCombat > monsterMagic) {
           this.currentHero.takeDamage(hit);
@@ -309,20 +362,20 @@ export default {
             this.endTurn();
             return;
           }
-          this.lastActions.push(`Monster hit for ${hit}`);
+          this.lastActions.unshift(`Monster hit for ${hit}`);
         } else {
           if (this.isAttackBlocked(this.currentHero, 'magicKnowledge')) {
             this.endTurn();
             return;
           }
           this.currentHero.takeDamage(spell);
-          this.lastActions.push(`Monster casted a spell for ${spell}`);
+          this.lastActions.unshift(`Monster casted a spell for ${spell}`);
         }
       } else {
         const healing = this.currentMonster.healSelf();
         this.currentMonster.setHealth(healing);
         this.currentMonster.setCooldown('healing', 3);
-        this.lastActions.push(`Monster healed up`);
+        this.lastActions.unshift(`Monster healed up`);
       }
 
       if (this.currentHero.isDead()) {
@@ -381,6 +434,7 @@ export default {
 
 <style lang="scss">
 @import url(https://fonts.googleapis.com/css?family=Lato:400,700,900);
+@import 'animate.css';
 
 * {
   padding: 0;
@@ -402,22 +456,27 @@ body {
 }
 
 .credits-manager {
-  user-select: none;
+  position: absolute;
+  top: 55%;
+  left: 20%;
+
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 10px;
-  position: absolute;
-  bottom: 30px;
-  left: calc(5% - 20px);
-  background-color: orangered;
-  border-radius: 14px;
-  box-shadow: 0 0 3px 2px black;
-  padding: 20px;
-  font-size: 24px;
-  color: white;
+
   width: 90%;
-  height: 400px;
+  max-width: 450px;
+  height: 320px;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 0 3px 2px black;
+
+  background-color: orangered;
+  color: white;
+
+  font-size: 24px;
+  user-select: none;
 
   &__title {
     font-size: 44px;
@@ -440,11 +499,12 @@ body {
 
   &__img {
     position: absolute;
+    top: 80%;
+    right: 50%;
+    z-index: 999;
+
     width: 100px;
     height: 100px;
-    right: 50%;
-    top: 80%;
-    z-index: 999;
   }
 }
 
@@ -456,16 +516,40 @@ body {
 }
 
 .battle__actions-list {
-  padding: 10px;
-  margin: auto 75px;
+  display: flex;
+  flex-direction: column-reverse;
+
   width: 300px;
   height: 250px;
+  padding: 10px;
   border: 1px solid gray;
+  border-radius: 8px;
+
   overflow-y: scroll;
   list-style-type: none;
+  user-select: none;
+
+  &::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  &::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    border-radius: 14px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 14px;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
   & li {
-    font-size: 20px;
     margin: 20px 0;
+    font-size: 20px;
   }
 }
 
@@ -485,35 +569,30 @@ body {
   width: 60%;
   padding: 70px 0;
   margin: 100px auto;
+  border: 1px solid gray;
+
+  background-color: rgb(145, 226, 236);
   text-align: center;
   font-size: 26px;
   line-height: 24px;
-  border: 1px solid gray;
-  background-color: rgb(145, 226, 236);
 }
-
-.slide-enter-active {
-  transition-duration: 0.3s;
-  transition-timing-function: ease-in;
+.bounce-enter-active {
+  animation: bounce-in 0.5s;
 }
-
-.slide-leave-active {
-  transition-duration: 0.3s;
-  transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+.bounce-leave-active {
+  animation: bounce-in 0.5s reverse;
 }
-
-.slide-enter-to,
-.slide-leave {
-  max-height: 100px;
-  overflow: hidden;
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
-
-.slide-enter,
-.slide-leave-to {
-  overflow: hidden;
-  max-height: 0;
-}
-
 .list-move,
 .list-enter-active,
 .list-leave-active {

@@ -89,12 +89,14 @@ export default {
   }
 }
 
-.skills,
+.skills {
+  @include fancy-btn(#47d82a, #168f34, #1a9124, 80px, 50px);
+  font-size: 36px;
+}
 .update-stats {
   @include fancy-btn(#ae6a06, #ffbd21, #fe8d0a, 80px, 50px);
   font-size: 20px;
   color: black;
-  padding: 5px;
 }
 
 .close {

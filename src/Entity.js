@@ -73,51 +73,6 @@ export class Entity {
   }
 
   blockChance(type) {
-    //* tylko testowo
     return this.getAttribute(type) / 4;
   }
-
-  // healInjures(value) {
-  //   if (value) {
-  //     if (this.currentHealth + value > this.maxHealth) {
-  //       this.currentHealth = this.maxHealth;
-  //     } else {
-  //       this.currentHealth += value;
-  //     }
-  //     console.log('%chealed for', 'color: green', value);
-  //   } else {
-  //     const powerOfHealing = getRandomInt(10, 50);
-  //     const healing = Math.round((powerOfHealing * this.maxHealth) / 100);
-
-  //     if (this.currentHealth + healing > this.maxHealth) {
-  //       this.currentHealth = this.maxHealth;
-  //     } else {
-  //       this.currentHealth += healing;
-  //     }
-  //     this.calcCooldowns();
-  //     this.healingCooldown = 2;
-  //     console.log('%chealed for', 'color: green', healing);
-  //   }
-  // }
-
-  // getHighestStat(check) {
-  //   if (this.combatEfficiency > this.magicKnowledge) {
-  //     return this.combatEfficiency;
-  //   } else if (this.combatEfficiency < this.magicKnowledge) {
-  //     return this.magicKnowledge;
-  //   } else {
-  //     return check.combatEfficiency > check.magicKnowledge
-  //       ? check.combatEfficiency
-  //       : check.magicKnowledge;
-  //   }
-  // }
-
-  // calcCooldowns() {
-  //   if (this.healingCooldown > 0) {
-  //     this.healingCooldown--;
-  //   }
-  //   if (this.specialAttackCooldown > 0) {
-  //     this.specialAttackCooldown--;
-  //   }
-  // }
 }
