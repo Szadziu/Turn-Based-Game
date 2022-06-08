@@ -49,7 +49,7 @@ export default {
   components: {
     HealthBar,
   },
-  props: ['char', 'animFlag', 'currentTurn'],
+  props: ['char'],
   computed: {
     percentageValue() {
       if (this.heroDead) return 0;

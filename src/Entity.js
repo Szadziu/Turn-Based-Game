@@ -73,7 +73,20 @@ export class Entity {
     return this.cooldows[name];
   }
 
-  blockChance(type) {
-    return this.getAttribute(type) / 4;
+  isAttackBlocked(type) {
+    const chance = this.getAttribute(type) / 4;
+    const probability = getRandomInt(0, 100 + chance);
+
+    if (probability < chance) {
+      // this.addActionToLog(`${this.name} blocked attack`);
+      console.log(`block chance ${chance}%`);
+
+      this.setAttribute('blocked', true);
+      setTimeout(() => this.setAttribute('blocked', false), 1000);
+
+      return true;
+    } else {
+      return false;
+    }
   }
 }

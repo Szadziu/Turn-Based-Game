@@ -15,33 +15,20 @@
     </div>
     <div class="battle__container">
       <div class="battle__characters-container" v-if="isGame">
-        <CharacterCard
-          :char="currentHero"
-          ref="hero"
-          :animFlag="actionAnimationFlags"
-          :currentTurn="currentTurn"
-        />
-
-        <CharacterCard
-          :char="currentMonster"
-          ref="monster"
-          class="animate__animated"
-        />
-        <!-- <div class="block" v-if="currentMonster.blocked">
-          <img class="block__img" src="./assets/shield.png" alt="shield" />
-        </div> -->
+        <CharacterCard :char="currentHero" />
+        <CharacterCard :char="currentMonster" />
       </div>
       <div v-if="isGame" class="battle__actions-container">
         <div class="battle__hero-actions">
           <FancyButton
-            @click="heroTurn('MELEE')"
+            @click="heroTurn(ACTIONS_ENUM.MELEE)"
             :disabled="currentHero.blocked"
             :class="'character--attack'"
           >
             attack
           </FancyButton>
           <FancyButton
-            @click="heroTurn('MAGIC')"
+            @click="heroTurn(ACTIONS_ENUM.MAGIC)"
             :disabled="currentHero.blocked"
             :class="'character--spell'"
           >
@@ -51,7 +38,7 @@
             :disabled="
               currentHero.getCooldown('healing') > 0 || currentHero.blocked
             "
-            @click="heroTurn('HEAL')"
+            @click="heroTurn(ACTIONS_ENUM.HEAL)"
             :class="'character--heal'"
           >
             heal
@@ -76,7 +63,7 @@
             }}
           </FancyButton>
         </div>
-        <TransitionGroup tag="ul" class="battle__actions-list">
+        <ul class="battle__actions-list">
           <li
             class="animate__animated animate__fadeInUp"
             v-for="(action, i) in lastActions"
@@ -84,7 +71,7 @@
           >
             {{ action }}
           </li>
-        </TransitionGroup>
+        </ul>
         <FancyButton
           :disabled="!availableCredits"
           class="skills"
@@ -192,12 +179,15 @@ export default {
       return this.allMonsters.filter(
         (monster) => monster.level === this.currentMonsterLevel
       );
-
-      // return this.allMonsters
-      //   .filter((monster) => monster.level === this.currentMonsterLevel)
-      //   .sort(() => Math.random() - 0.5)
-      //   .slice(0, 1);
     },
+    ACTIONS_ENUM() {
+      return ACTIONS_ENUM;
+    },
+
+    // return this.allMonsters
+    //   .filter((monster) => monster.level === this.currentMonsterLevel)
+    //   .sort(() => Math.random() - 0.5)
+    //   .slice(0, 1);
   },
 
   methods: {
@@ -235,8 +225,8 @@ export default {
       this.defeatedMonsters++;
       this.availableCredits += 5;
       this.currentHero.regenerateInjures();
-      this.lastActions.unshift(`${this.currentMonster.name} died`);
-      this.lastActions.unshift(`Hero regenerated`);
+      this.addActionToLog(`${this.currentMonster.name} died`);
+      this.addActionToLog(`Hero regenerated`);
 
       this.allMonsters = this.allMonsters.filter(
         (monster) => this.currentMonster.name !== monster.name
@@ -268,33 +258,6 @@ export default {
       }
     },
 
-    isAttackBlocked(character, type) {
-      const chance = character.blockChance(type);
-      const probability = getRandomInt(0, 100 + chance);
-
-      if (probability < chance) {
-        this.lastActions.unshift(`${character.name} blocked attack`);
-        console.log(`block chance ${chance}%`);
-        if (this.currentTurn === 'hero') {
-          this.currentHero.setAttribute('blocked', true);
-          // this.currentHero.blocked = true;
-          setTimeout(
-            () => this.currentHero.setAttribute('blocked', false),
-            1000
-          );
-        } else {
-          this.currentMonster.setAttribute('blocked', true);
-          // this.currentMonster.blocked = true;
-          setTimeout(
-            () => this.currentMonster.setAttribute('blocked', false),
-            1000
-          );
-        }
-        // setTimeout(() => (this.blocked = false), 1000);
-        return true;
-      }
-    },
-
     toggleActionsAnimation(flag) {
       // console.log(getComputedStyle(this.$refs.monster.$el)['animation-duration']);
 
@@ -304,17 +267,21 @@ export default {
       }, 500);
     },
 
+    addActionToLog(action) {
+      this.lastActions.unshift(action);
+    },
+
     heroTurn(action) {
       const audioSword = new Audio(sounds.sword);
 
       if (action === ACTIONS_ENUM.MELEE) {
         const hit = this.currentHero.executeAttack();
 
-        if (this.isAttackBlocked(this.currentMonster, 'combatEfficiency'))
+        if (this.currentMonster.isAttackBlocked('combatEfficiency'))
           this.monsterTurn(this.currentMonster.drawRandomAction());
 
         this.currentMonster.takeDamage(hit);
-        this.lastActions.unshift(`Hero hit for ${hit}`);
+        this.addActionToLog(`Hero hit for ${hit}`);
 
         audioSword.play();
 
@@ -324,29 +291,29 @@ export default {
       if (action === ACTIONS_ENUM.MAGIC) {
         const spell = this.currentHero.castSpell();
 
-        if (this.isAttackBlocked(this.currentMonster, 'magicKnowledge'))
+        if (this.currentMonster.isAttackBlocked('magicKnowledge'))
           this.monsterTurn(this.currentMonster.drawRandomAction());
 
         this.currentMonster.takeDamage(spell);
-        this.lastActions.unshift(`Hero casted a spell for ${spell}`);
+        this.addActionToLog(`Hero casted a spell for ${spell}`);
         // this.$refs.monster.$el.classList.add('animate__wobble');
       }
 
       if (action === ACTIONS_ENUM.HEAL) {
         const healing = this.currentHero.healSelf();
         this.currentHero.setHealth(healing);
-        this.lastActions.unshift(`Hero healed up`);
+        this.addActionToLog(`Hero healed up`);
         this.currentHero.setCooldown('healing', 3);
       }
 
       if (action === ACTIONS_ENUM.SPECIAL) {
         const special = this.currentHero.specialAttack();
 
-        if (this.isAttackBlocked(this.currentMonster, 'specialAttack'))
+        if (this.currentMonster.isAttackBlocked('specialAttack'))
           this.monsterTurn(this.currentMonster.drawRandomAction());
 
         this.currentMonster.takeDamage(special);
-        this.lastActions.unshift(`Hero use special attack for ${special}`);
+        this.addActionToLog(`Hero use special attack for ${special}`);
         this.currentHero.setCooldown('special', 7);
 
         this.toggleActionsAnimation();
@@ -374,40 +341,40 @@ export default {
         const spell = this.currentHero.castSpell();
         if (monsterDualSpecialization) {
           if (heroCombat > heroMagic) {
-            if (this.isAttackBlocked(this.currentHero, 'magicKnowledge')) {
+            if (this.currentHero.isAttackBlocked('magicKnowledge')) {
               this.endTurn();
               return;
             }
             this.currentHero.takeDamage(spell);
-            this.lastActions.unshift(`Monster casted a spell for ${spell}`);
+            this.addActionToLog(`Monster casted a spell for ${spell}`);
           } else {
-            if (this.isAttackBlocked(this.currentHero, 'combatEfficiency')) {
+            if (this.currentHero.isAttackBlocked('combatEfficiency')) {
               this.endTurn();
               return;
             }
             this.currentHero.takeDamage(hit);
-            this.lastActions.unshift(`Monster hit for ${hit}`);
+            this.addActionToLog(`Monster hit for ${hit}`);
           }
         } else if (monsterCombat > monsterMagic) {
           this.currentHero.takeDamage(hit);
-          if (this.isAttackBlocked(this.currentHero, 'combatEfficiency')) {
+          if (this.currentHero.isAttackBlocked('combatEfficiency')) {
             this.endTurn();
             return;
           }
-          this.lastActions.unshift(`Monster hit for ${hit}`);
+          this.addActionToLog(`Monster hit for ${hit}`);
         } else {
-          if (this.isAttackBlocked(this.currentHero, 'magicKnowledge')) {
+          if (this.currentHero.isAttackBlocked('magicKnowledge')) {
             this.endTurn();
             return;
           }
           this.currentHero.takeDamage(spell);
-          this.lastActions.unshift(`Monster casted a spell for ${spell}`);
+          this.addActionToLog(`Monster casted a spell for ${spell}`);
         }
       } else {
         const healing = this.currentMonster.healSelf();
         this.currentMonster.setHealth(healing);
         this.currentMonster.setCooldown('healing', 3);
-        this.lastActions.unshift(`Monster healed up`);
+        this.addActionToLog(`Monster healed up`);
       }
 
       if (this.currentHero.isDead()) {
