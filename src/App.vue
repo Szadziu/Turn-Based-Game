@@ -317,8 +317,17 @@ export default {
     },
 
     playSound: async function (audio) {
-      const sound = new Audio(audio);
-      return await sound.play();
+      const promise = await new Promise(() => {
+        const sound = new Audio(audio);
+        sound.play();
+      }).catch((err) => {
+        throw err;
+      });
+
+      return promise;
+
+      // const sound = new Audio(audio);
+      // return await sound.play();
     },
 
     monsterTurn(rdmAction) {
