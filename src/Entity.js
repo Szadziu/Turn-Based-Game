@@ -76,6 +76,7 @@ export class Entity {
   }
 
   setCooldown(name, value = 0) {
+    if (value < 0) return;
     this.cooldows[name] = value;
   }
 

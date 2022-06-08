@@ -5,7 +5,9 @@ import { getRandomInt } from './helpers/helpers';
 export class Monster extends Entity {
   constructor({ level, ...rest }) {
     super({ ...rest });
+
     this.level = level;
+    this.dualSpecialization = this.combatEfficiency === this.magicKnowledge;
   }
 
   drawRandomAction() {

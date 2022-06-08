@@ -236,10 +236,7 @@ export default {
       this.allMonsters = this.allMonsters.filter(
         (monster) => this.currentMonster.name !== monster.name
       );
-
-      if (this.endTurn()) {
-        this.createMonster();
-      }
+      this.createMonster();
     },
 
     heroDead() {
@@ -265,33 +262,55 @@ export default {
     addActionToLog(action) {
       this.lastActions.unshift(action);
     },
+    playSound(audio) {
+      return new Promise((resolve, reject) => {
+        console.log(resolve, reject);
+        const sound = new Audio(audio);
+        // czy gotowy do odtworzenia
+        sound.play();
 
+        // czy skonczony
+
+        // if(sound.sto)
+      });
+    },
+
+    async byleCo() {
+      console.log('start');
+      await this.playSound('sciezka');
+      console.log('stop');
+    },
+
+    //* TURA BOHATERA - przyjmuje akcje, którą wybrał bohater i ją wykonuje. Na koniec wywołuje endTurn()
     heroTurn(action) {
       if (action === ACTIONS_ENUM.MELEE) {
         const hit = this.currentHero.executeAttack();
 
-        if (this.currentMonster.isAttackBlocked('combatEfficiency'))
+        if (this.currentMonster.isAttackBlocked('combatEfficiency')) {
           this.monsterTurn(this.currentMonster.drawRandomAction());
+          //* endturn
+          return;
+        }
 
         this.currentMonster.takeDamage(hit, 'smallHit');
         this.addActionToLog(`Hero hit for ${hit}`);
-
-        this.playSound(sounds.sword);
       }
 
       if (action === ACTIONS_ENUM.MAGIC) {
         const spell = this.currentHero.castSpell();
 
-        if (this.currentMonster.isAttackBlocked('magicKnowledge'))
+        if (this.currentMonster.isAttackBlocked('magicKnowledge')) {
           this.monsterTurn(this.currentMonster.drawRandomAction());
+          return;
+        }
 
         this.currentMonster.takeDamage(spell, 'castSpell');
         this.addActionToLog(`Hero casted a spell for ${spell}`);
-        // this.$refs.monster.$el.classList.add('animate__wobble');
       }
 
       if (action === ACTIONS_ENUM.HEAL) {
         const healing = this.currentHero.healSelf();
+
         this.currentHero.setHealth(healing);
         this.addActionToLog(`Hero healed up`);
         this.currentHero.setCooldown('healing', 3);
@@ -300,58 +319,40 @@ export default {
       if (action === ACTIONS_ENUM.SPECIAL) {
         const special = this.currentHero.specialAttack();
 
-        if (this.currentMonster.isAttackBlocked('specialAttack'))
+        if (this.currentMonster.isAttackBlocked('specialAttack')) {
           this.monsterTurn(this.currentMonster.drawRandomAction());
+        }
 
         this.currentMonster.takeDamage(special, 'bigHit');
         this.addActionToLog(`Hero use special attack for ${special}`);
         this.currentHero.setCooldown('special', 7);
       }
 
-      if (this.currentMonster.isDead()) {
-        this.monsterDead();
-      } else {
-        this.monsterTurn(this.currentMonster.drawRandomAction());
-      }
-      this.toggleTurn();
+      this.endTurn();
     },
 
-    playSound: async function (audio) {
-      const promise = new Promise((resolve, reject) => {
-        try {
-          const sound = new Audio(resolve(audio));
-          sound.play();
-        } catch {
-          reject();
-        }
-      });
-
-      return promise;
-    },
-
+    //* TURA POTWORA - przyjmuje losową akcje, i ją wykonuje. Na koniec wywołuje endTurn()
     monsterTurn(rdmAction) {
       const heroCombat = this.currentHero.combatEfficiency;
       const monsterCombat = this.currentMonster.combatEfficiency;
       const heroMagic = this.currentHero.magicKnowledge;
       const monsterMagic = this.currentMonster.magicKnowledge;
-      const monsterDualSpecialization = monsterCombat === monsterMagic;
       if (
         rdmAction === ACTIONS_ENUM.MELEE ||
         rdmAction === ACTIONS_ENUM.MAGIC
       ) {
         const hit = this.currentMonster.executeAttack();
         const spell = this.currentHero.castSpell();
-        if (monsterDualSpecialization) {
+
+        if (this.currentMonster.dualSpecialization) {
           if (heroCombat > heroMagic) {
             if (this.currentHero.isAttackBlocked('magicKnowledge')) {
-              this.endTurn();
               return;
             }
             this.currentHero.takeDamage(spell, 'castSpell');
             this.addActionToLog(`Monster casted a spell for ${spell}`);
           } else {
             if (this.currentHero.isAttackBlocked('combatEfficiency')) {
-              this.endTurn();
               return;
             }
             this.currentHero.takeDamage(hit, 'smallHit');
@@ -360,13 +361,11 @@ export default {
         } else if (monsterCombat > monsterMagic) {
           this.currentHero.takeDamage(hit, 'smallHit');
           if (this.currentHero.isAttackBlocked('combatEfficiency')) {
-            this.endTurn();
             return;
           }
           this.addActionToLog(`Monster hit for ${hit}`);
         } else {
           if (this.currentHero.isAttackBlocked('magicKnowledge')) {
-            this.endTurn();
             return;
           }
           this.currentHero.takeDamage(spell, 'castSpell');
@@ -379,59 +378,66 @@ export default {
         this.addActionToLog(`Monster healed up`);
       }
 
-      if (this.currentHero.isDead()) {
-        this.isGame = false;
-      } else {
-        this.endTurn();
-      }
+      this.endTurn();
     },
 
+    //* funkcja przełącza tury
     toggleTurn() {
-      if (this.currentTurn === 'hero') {
-        this.currentTurn = 'monster';
-      } else {
-        this.currentTurn = 'hero';
+      this.currentTurn === 'hero'
+        ? (this.currentTurn = 'monster')
+        : (this.currentTurn = 'hero');
+
+      if (this.currentTurn === 'monster') {
+        this.monsterTurn(this.currentMonster.drawRandomAction());
       }
     },
 
+    //* CLEANER - funkcja sprzątająca, kończąca turę. Powinna sprawdzać czy potwór/bohater padł.
     endTurn() {
-      if (this.allMonsters.length === 0) {
-        this.isGame = false;
-        return;
-      }
+      //* gdy tura bohatera
+      if (this.currentTurn === 'hero') {
+        if (this.currentMonster.isDead()) {
+          this.monsterDead();
+        }
 
-      // defeated monsters
-      if (this.monstersPool.length === 0) {
-        this.currentMonsterLevel++;
-      }
-      //       if (!this.defeatedMonsters % 2) {
-      //   this.currentMonsterLevel++;
-      // }
+        //* sprawdzamy czy są jeszcze potwory jeśli nie => gra wygrana
+        if (this.allMonsters.length === 0) {
+          this.isGame = false;
+          return;
+        }
 
-      this.toggleTurn();
-
-      if (this.currentHero.getCooldown('healing') > 0) {
+        //* obniżenie cd's bohatera
         this.currentHero.setCooldown(
           'healing',
           this.currentHero.getCooldown('healing') - 1
         );
-      }
-
-      if (this.currentHero.getCooldown('special') > 0) {
         this.currentHero.setCooldown(
           'special',
           this.currentHero.getCooldown('special') - 1
         );
       }
 
-      if (this.currentMonster.getCooldown('healing') > 0) {
+      //* gdy tura potwora
+      if (this.currentTurn === 'monster') {
+        if (this.currentHero.isDead()) {
+          this.isGame = false;
+        }
+
+        //* obniżenie cd's potwora
         this.currentMonster.setCooldown(
           'healing',
           this.currentMonster.getCooldown('healing') - 1
         );
       }
 
-      return true;
+      //* jeśli pula potworów się skończyła => podnieść level kolejnych potworów
+      if (this.monstersPool.length === 0) {
+        this.currentMonsterLevel++;
+      }
+
+      //* zmiana gracza
+      console.log('aktualna tura');
+      this.toggleTurn();
     },
   },
 };
