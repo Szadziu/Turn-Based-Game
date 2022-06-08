@@ -15,56 +15,72 @@
     </div>
     <div class="battle__container">
       <div class="battle__characters-container" v-if="isGame">
-        <CharacterCard :char="currentHero" ref="hero" />
-        <div class="block" v-if="currentTurn === 'hero' && blocked">
-          <img class="block__img" src="./assets/shield.png" alt="shield" />
-        </div>
+        <CharacterCard
+          :char="currentHero"
+          ref="hero"
+          :animFlag="actionAnimationFlags"
+          :currentTurn="currentTurn"
+        />
+
         <CharacterCard
           :char="currentMonster"
           ref="monster"
           class="animate__animated"
-          :class="{ animate__wobble: actionAnimationFlag }"
         />
-        <div class="block" v-if="currentTurn === 'monster' && blocked">
+        <!-- <div class="block" v-if="currentMonster.blocked">
           <img class="block__img" src="./assets/shield.png" alt="shield" />
-        </div>
+        </div> -->
       </div>
       <div v-if="isGame" class="battle__actions-container">
         <div class="battle__hero-actions">
           <FancyButton
             @click="heroTurn('MELEE')"
-            :disabled="blocked"
+            :disabled="currentHero.blocked"
             :class="'character--attack'"
           >
             attack
           </FancyButton>
           <FancyButton
             @click="heroTurn('MAGIC')"
-            :disabled="blocked"
+            :disabled="currentHero.blocked"
             :class="'character--spell'"
           >
             cast spell
           </FancyButton>
           <FancyButton
-            :disabled="currentHero.getCooldown('healing') > 0 || blocked"
+            :disabled="
+              currentHero.getCooldown('healing') > 0 || currentHero.blocked
+            "
             @click="heroTurn('HEAL')"
             :class="'character--heal'"
           >
-            heal({{ currentHero.getCooldown('healing') }})
+            heal
+            {{
+              currentHero.getCooldown('healing')
+                ? '(' + currentHero.getCooldown('healing') + ')'
+                : ''
+            }}
           </FancyButton>
           <FancyButton
             @click="heroTurn('SPECIAL')"
-            :disabled="currentHero.getCooldown('special') > 0 || blocked"
+            :disabled="
+              currentHero.getCooldown('special') > 0 || currentHero.blocked
+            "
             :class="'character--special'"
           >
-            special attack({{ currentHero.getCooldown('special') }})
+            special attack
+            {{
+              currentHero.getCooldown('special')
+                ? '(' + currentHero.getCooldown('special') + ')'
+                : ''
+            }}
           </FancyButton>
         </div>
         <TransitionGroup tag="ul" class="battle__actions-list">
           <li
             class="animate__animated animate__fadeInUp"
-            v-for="action in lastActions"
-            :key="action"
+            v-for="(action, i) in lastActions"
+            :key="i"
           >
             {{ action }}
           </li>
@@ -157,10 +173,13 @@ export default {
       availableCredits: 0,
       isGame: false,
       currentTurn: 'hero',
-      blocked: false,
       isCreditsManagerOpen: false,
       actionList: null,
-      actionAnimationFlag: false,
+      actionAnimationFlags: {
+        attack: false,
+        spell: false,
+        block: false,
+      },
     };
   },
 
@@ -222,6 +241,7 @@ export default {
       this.allMonsters = this.allMonsters.filter(
         (monster) => this.currentMonster.name !== monster.name
       );
+
       if (this.endTurn()) {
         this.createMonster();
       }
@@ -255,27 +275,37 @@ export default {
       if (probability < chance) {
         this.lastActions.unshift(`${character.name} blocked attack`);
         console.log(`block chance ${chance}%`);
-        this.blocked = true;
-        setTimeout(() => (this.blocked = false), 1000);
+        if (this.currentTurn === 'hero') {
+          this.currentHero.setAttribute('blocked', true);
+          // this.currentHero.blocked = true;
+          setTimeout(
+            () => this.currentHero.setAttribute('blocked', false),
+            1000
+          );
+        } else {
+          this.currentMonster.setAttribute('blocked', true);
+          // this.currentMonster.blocked = true;
+          setTimeout(
+            () => this.currentMonster.setAttribute('blocked', false),
+            1000
+          );
+        }
+        // setTimeout(() => (this.blocked = false), 1000);
         return true;
       }
     },
 
-    toggleActionsAnimation() {
-      this.actionAnimationFlag = true;
+    toggleActionsAnimation(flag) {
+      // console.log(getComputedStyle(this.$refs.monster.$el)['animation-duration']);
+
+      this.actionAnimationFlags[flag] = true;
       setTimeout(() => {
-        this.actionAnimationFlag = false;
+        this.actionAnimationFlags[flag] = false;
       }, 500);
-      // setTimeout(
-      //   () => this.$refs.monster.$el.classList.remove('animate__wobble'),
-      //   500
-      // );
     },
 
     heroTurn(action) {
       const audioSword = new Audio(sounds.sword);
-
-      // this.$refs.monster.$el.classList.add('animate__animated');
 
       if (action === ACTIONS_ENUM.MELEE) {
         const hit = this.currentHero.executeAttack();
@@ -287,7 +317,7 @@ export default {
         this.lastActions.unshift(`Hero hit for ${hit}`);
 
         audioSword.play();
-        // this.$refs.monster.$el.classList.add('animate__wobble');
+
         this.toggleActionsAnimation();
       }
 
@@ -318,6 +348,8 @@ export default {
         this.currentMonster.takeDamage(special);
         this.lastActions.unshift(`Hero use special attack for ${special}`);
         this.currentHero.setCooldown('special', 7);
+
+        this.toggleActionsAnimation();
       }
 
       if (this.currentMonster.isDead()) {
@@ -399,9 +431,13 @@ export default {
         return;
       }
 
+      // defeated monsters
       if (this.monstersPool.length === 0) {
         this.currentMonsterLevel++;
       }
+      //       if (!this.defeatedMonsters % 2) {
+      //   this.currentMonsterLevel++;
+      // }
 
       this.toggleTurn();
 
@@ -491,20 +527,6 @@ body {
     &-item {
       width: 30%;
     }
-  }
-}
-
-.block {
-  position: relative;
-
-  &__img {
-    position: absolute;
-    top: 80%;
-    right: 50%;
-    z-index: 999;
-
-    width: 100px;
-    height: 100px;
   }
 }
 
@@ -607,5 +629,33 @@ body {
 
 .list-leave-active {
   position: absolute;
+}
+
+.shake {
+  animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  transform: translate3d(0, 0, 0);
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
 }
 </style>

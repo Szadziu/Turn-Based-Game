@@ -7,6 +7,7 @@ export class Entity {
     this.combatEfficiency = combatEfficiency;
     this.magicKnowledge = magicKnowledge;
     this.image = img;
+    this.blocked = false;
 
     this.maxHealth = health;
 

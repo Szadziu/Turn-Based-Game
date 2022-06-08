@@ -9,6 +9,17 @@
 
     <div class="card__name">{{ char.name }}</div>
 
+    <div class="block" v-if="char.blocked">
+      <img
+        class="block__img animate__animated"
+        :class="{
+          animate__flash: char.blocked,
+        }"
+        src="../assets/shield.png"
+        alt="shield"
+      />
+    </div>
+
     <HealthBar color="#42B782" v-model="percentageValue" />
 
     <div class="card__stats">
@@ -38,7 +49,7 @@ export default {
   components: {
     HealthBar,
   },
-  props: ['char'],
+  props: ['char', 'animFlag', 'currentTurn'],
   computed: {
     percentageValue() {
       if (this.heroDead) return 0;
@@ -59,6 +70,7 @@ export default {
 }
 
 .card {
+  position: relative;
   background: white;
   width: 300px;
   margin: 0 75px;
@@ -180,6 +192,17 @@ export default {
     .stat-value {
       position: relative;
       font-size: 28px;
+    }
+  }
+  .block {
+    position: absolute;
+    top: 60%;
+    left: 80%;
+    z-index: 999;
+
+    &__img {
+      width: 120px;
+      height: 120px;
     }
   }
 }
