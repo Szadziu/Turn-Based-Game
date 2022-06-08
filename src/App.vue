@@ -154,7 +154,6 @@ import { Monster } from './Monster';
 import CharacterCard from './components/CharacterCard.vue';
 import FancyButton from './components/FancyButton.vue';
 import { getRandomInt } from './helpers/helpers';
-import { sounds } from './cons/sounds';
 
 export default {
   name: 'App',
@@ -172,6 +171,7 @@ export default {
       currentTurn: 'hero',
       isCreditsManagerOpen: false,
       actionList: null,
+      publicPath: process.env.BASE_URL,
     };
   },
 
@@ -188,11 +188,6 @@ export default {
     ACTIONS_ENUM() {
       return ACTIONS_ENUM;
     },
-
-    // return this.allMonsters
-    //   .filter((monster) => monster.level === this.currentMonsterLevel)
-    //   .sort(() => Math.random() - 0.5)
-    //   .slice(0, 1);
   },
 
   methods: {
@@ -226,6 +221,13 @@ export default {
       this.isCreditsManagerOpen = !this.isCreditsManagerOpen;
     },
 
+    //* PORAŻKA POTWORA - funkcja powinna:
+    //* - podnosić poziom pokonanych potworów
+    //* - podnieść ilość kredytów o 5
+    //* - zregenerować bohatera
+    //* - dodać do loga ostatnie akcje
+    //* - usunąć lub wykluczyć pokonanego potwora
+    //* - stworzyć nowego potwora
     monsterDead() {
       this.defeatedMonsters++;
       this.availableCredits += 5;
@@ -233,17 +235,16 @@ export default {
       this.addActionToLog(`${this.currentMonster.name} died`);
       this.addActionToLog(`Hero regenerated`);
 
+      //! czy to dobre podejście ?
       this.allMonsters = this.allMonsters.filter(
         (monster) => this.currentMonster.name !== monster.name
       );
+
+      //!
       this.createMonster();
     },
 
-    heroDead() {
-      this.playSound(sounds.dead);
-      this.isGame = false;
-    },
-
+    //* AWANS - funkcja powinna przyjąć podnoszoną statystykę oraz uaktualnić stan bohatera
     updateHeroStats(stat) {
       if (this.availableCredits > 0) {
         this.availableCredits--;
@@ -262,29 +263,27 @@ export default {
     addActionToLog(action) {
       this.lastActions.unshift(action);
     },
+
     playSound(audio) {
       return new Promise((resolve, reject) => {
         console.log(resolve, reject);
         const sound = new Audio(audio);
-        // czy gotowy do odtworzenia
+
         sound.play();
-
-        // czy skonczony
-
-        // if(sound.sto)
+        if (sound.ended) {
+          resolve();
+        }
       });
-    },
-
-    async byleCo() {
-      console.log('start');
-      await this.playSound('sciezka');
-      console.log('stop');
     },
 
     //* TURA BOHATERA - przyjmuje akcje, którą wybrał bohater i ją wykonuje. Na koniec wywołuje endTurn()
     heroTurn(action) {
       if (action === ACTIONS_ENUM.MELEE) {
         const hit = this.currentHero.executeAttack();
+
+        //! do przeniesienia w inne miejsce (metoda ataku w klasie Entity ?)
+        this.playSound(`${this.publicPath}sounds/sword.wav`);
+        //!
 
         if (this.currentMonster.isAttackBlocked('combatEfficiency')) {
           this.monsterTurn(this.currentMonster.drawRandomAction());
@@ -381,62 +380,59 @@ export default {
       this.endTurn();
     },
 
-    //* funkcja przełącza tury
+    //* SWITCH TURN - funkcja przełącza tury
     toggleTurn() {
       this.currentTurn === 'hero'
         ? (this.currentTurn = 'monster')
         : (this.currentTurn = 'hero');
 
+      //! to się raczej nie powinno tutaj wykonywać
       if (this.currentTurn === 'monster') {
         this.monsterTurn(this.currentMonster.drawRandomAction());
       }
+      //!
     },
 
     //* CLEANER - funkcja sprzątająca, kończąca turę. Powinna sprawdzać czy potwór/bohater padł.
-    endTurn() {
-      //* gdy tura bohatera
-      if (this.currentTurn === 'hero') {
-        if (this.currentMonster.isDead()) {
-          this.monsterDead();
+    async endTurn() {
+      if (this.currentMonster.isDead()) {
+        //* jeśli pula potworów się skończyła => podnieść level kolejnych potworów
+        if (this.defeatedMonsters % 2 === 0 && this.defeatedMonsters > 0) {
+          console.log(this.defeatedMonsters % 2, 'podnoszę level');
+          this.currentMonsterLevel++;
         }
-
-        //* sprawdzamy czy są jeszcze potwory jeśli nie => gra wygrana
-        if (this.allMonsters.length === 0) {
-          this.isGame = false;
-          return;
-        }
-
-        //* obniżenie cd's bohatera
-        this.currentHero.setCooldown(
-          'healing',
-          this.currentHero.getCooldown('healing') - 1
-        );
-        this.currentHero.setCooldown(
-          'special',
-          this.currentHero.getCooldown('special') - 1
-        );
+        this.monsterDead();
+        return;
       }
 
-      //* gdy tura potwora
-      if (this.currentTurn === 'monster') {
-        if (this.currentHero.isDead()) {
-          this.isGame = false;
-        }
+      //! kod za await sie nie wykonuje
+      if (this.currentHero.isDead()) {
+        await this.playSound(`${this.publicPath}sounds/dead.wav`);
+        this.isGame = false;
+      }
+      //!
 
-        //* obniżenie cd's potwora
-        this.currentMonster.setCooldown(
-          'healing',
-          this.currentMonster.getCooldown('healing') - 1
-        );
+      //* sprawdzamy czy są jeszcze potwory jeśli nie => gra się kończy
+      if (this.allMonsters.length === 0) {
+        this.isGame = false;
+        return;
       }
 
-      //* jeśli pula potworów się skończyła => podnieść level kolejnych potworów
-      if (this.monstersPool.length === 0) {
-        this.currentMonsterLevel++;
-      }
+      //* obniżenie cd's umiejętności dodatkowych
+      this.currentHero.setCooldown(
+        'healing',
+        this.currentHero.getCooldown('healing') - 1
+      );
+      this.currentHero.setCooldown(
+        'special',
+        this.currentHero.getCooldown('special') - 1
+      );
+      this.currentMonster.setCooldown(
+        'healing',
+        this.currentMonster.getCooldown('healing') - 1
+      );
 
-      //* zmiana gracza
-      console.log('aktualna tura');
+      //* zmiana tury gracza
       this.toggleTurn();
     },
   },

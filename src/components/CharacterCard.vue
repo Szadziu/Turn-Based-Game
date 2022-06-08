@@ -20,7 +20,7 @@
     <div class="block" v-if="char.getAnimationsFlag('blocked')">
       <img
         class="block__img animate__animated animate__flash"
-        src="../assets/shield.png"
+        src="/assets/items/shield.png"
         alt="shield"
       />
     </div>

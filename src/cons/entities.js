@@ -1,21 +1,3 @@
-import wizardImg from '@/assets/heroes/wizard.png';
-import vikingImg from '@/assets/heroes/viking.png';
-import rogueImg from '@/assets/heroes/rogue.png';
-import knightImg from '@/assets/heroes/knight.png';
-import archerImg from '@/assets/heroes/archer.png';
-import druidImg from '@/assets/heroes/druid.png';
-
-import gnomeImg from '@/assets/monsters/gnome.png';
-import goblinImg from '@/assets/monsters/goblin.png';
-import impImg from '@/assets/monsters/imp.png';
-import ogreImg from '@/assets/monsters/ogre.png';
-import trollImg from '@/assets/monsters/troll.png';
-import dragonImg from '@/assets/monsters/dragon.png';
-import giantImg from '@/assets/monsters/giant.png';
-import reaperImg from '@/assets/monsters/reaper.png';
-import vampireImg from '@/assets/monsters/vampire.png';
-import harpyImg from '@/assets/monsters/harpy.png';
-
 export const Heroes = [
   {
     id: '_h1',
@@ -23,7 +5,7 @@ export const Heroes = [
     health: 70,
     combatEfficiency: 10,
     magicKnowledge: 10,
-    img: vikingImg,
+    img: '/assets/heroes/viking.png',
   },
   {
     id: '_h2',
@@ -31,7 +13,7 @@ export const Heroes = [
     health: 30,
     combatEfficiency: 2,
     magicKnowledge: 18,
-    img: wizardImg,
+    img: '/assets/heroes/wizard.png',
   },
   {
     id: '_h3',
@@ -39,7 +21,7 @@ export const Heroes = [
     health: 50,
     combatEfficiency: 14,
     magicKnowledge: 4,
-    img: rogueImg,
+    img: '/assets/heroes/rogue.png',
   },
   {
     id: '_h4',
@@ -47,7 +29,7 @@ export const Heroes = [
     health: 60,
     combatEfficiency: 13,
     magicKnowledge: 8,
-    img: knightImg,
+    img: '/assets/heroes/knight.png',
   },
   {
     id: '_h5',
@@ -55,7 +37,7 @@ export const Heroes = [
     health: 40,
     combatEfficiency: 16,
     magicKnowledge: 3,
-    img: archerImg,
+    img: '/assets/heroes/archer.png',
   },
   {
     id: '_h6',
@@ -63,7 +45,7 @@ export const Heroes = [
     health: 55,
     combatEfficiency: 10,
     magicKnowledge: 8,
-    img: druidImg,
+    img: '/assets/heroes/druid.png',
   },
 ];
 
@@ -75,7 +57,7 @@ export const Monsters = [
     health: 15,
     combatEfficiency: 10,
     magicKnowledge: 2,
-    img: gnomeImg,
+    img: '/assets/monsters/gnome.png',
   },
   {
     id: '_m2',
@@ -84,7 +66,7 @@ export const Monsters = [
     health: 18,
     combatEfficiency: 4,
     magicKnowledge: 4,
-    img: goblinImg,
+    img: '/assets/monsters/goblin.png',
   },
   {
     id: '_m3',
@@ -93,52 +75,52 @@ export const Monsters = [
     health: 10,
     combatEfficiency: 7,
     magicKnowledge: 1,
-    img: impImg,
+    img: '/assets/monsters/imp.png',
   },
   {
     id: '_m4',
     name: 'ogre',
-    level: 3,
+    level: 2,
     health: 30,
     combatEfficiency: 3,
     magicKnowledge: 2,
-    img: ogreImg,
+    img: '/assets/monsters/ogre.png',
   },
   {
     id: '_m5',
     name: 'troll',
-    level: 1,
+    level: 2,
     health: 35,
     combatEfficiency: 13,
     magicKnowledge: 11,
-    img: trollImg,
+    img: '/assets/monsters/troll.png',
   },
   {
     id: '_m6',
     name: 'dragon',
-    level: 4,
+    level: 2,
     health: 50,
     combatEfficiency: 15,
     magicKnowledge: 15,
-    img: dragonImg,
+    img: '/assets/monsters/dragon.png',
   },
   {
     id: '_m7',
     name: 'giant',
-    level: 5,
+    level: 3,
     health: 40,
     combatEfficiency: 30,
     magicKnowledge: 1,
-    img: giantImg,
+    img: '/assets/monsters/giant.png',
   },
   {
     id: '_m8',
     name: 'reaper',
-    level: 2,
+    level: 3,
     health: 22,
     combatEfficiency: 8,
     magicKnowledge: 25,
-    img: reaperImg,
+    img: '/assets/monsters/reaper.png',
   },
   {
     id: '_m9',
@@ -147,7 +129,7 @@ export const Monsters = [
     health: 36,
     combatEfficiency: 12,
     magicKnowledge: 12,
-    img: harpyImg,
+    img: '/assets/monsters/harpy.png',
   },
   {
     id: '_m10',
@@ -156,6 +138,6 @@ export const Monsters = [
     health: 66,
     combatEfficiency: 9,
     magicKnowledge: 11,
-    img: vampireImg,
+    img: '/assets/monsters/vampire.png',
   },
 ];
