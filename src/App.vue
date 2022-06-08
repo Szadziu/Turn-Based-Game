@@ -22,21 +22,29 @@
         <div class="battle__hero-actions">
           <FancyButton
             @click="heroTurn(ACTIONS_ENUM.MELEE)"
-            :disabled="currentHero.blocked"
+            :disabled="
+              currentHero.getAnimationsFlag('blocked') ||
+              currentMonster.getAnimationsFlag('blocked')
+            "
             :class="'character--attack'"
           >
             attack
           </FancyButton>
           <FancyButton
             @click="heroTurn(ACTIONS_ENUM.MAGIC)"
-            :disabled="currentHero.blocked"
+            :disabled="
+              currentHero.getAnimationsFlag('blocked') ||
+              currentMonster.getAnimationsFlag('blocked')
+            "
             :class="'character--spell'"
           >
             cast spell
           </FancyButton>
           <FancyButton
             :disabled="
-              currentHero.getCooldown('healing') > 0 || currentHero.blocked
+              currentHero.getCooldown('healing') > 0 ||
+              currentHero.getAnimationsFlag('blocked') ||
+              currentMonster.getAnimationsFlag('blocked')
             "
             @click="heroTurn(ACTIONS_ENUM.HEAL)"
             :class="'character--heal'"
@@ -51,7 +59,9 @@
           <FancyButton
             @click="heroTurn('SPECIAL')"
             :disabled="
-              currentHero.getCooldown('special') > 0 || currentHero.blocked
+              currentHero.getCooldown('special') > 0 ||
+              currentHero.getAnimationsFlag('blocked') ||
+              currentMonster.getAnimationsFlag('blocked')
             "
             :class="'character--special'"
           >
@@ -162,11 +172,6 @@ export default {
       currentTurn: 'hero',
       isCreditsManagerOpen: false,
       actionList: null,
-      actionAnimationFlags: {
-        attack: false,
-        spell: false,
-        block: false,
-      },
     };
   },
 
@@ -238,8 +243,7 @@ export default {
     },
 
     heroDead() {
-      const audioDead = new Audio(sounds.dead);
-      audioDead.play();
+      this.playSound(sounds.dead);
       this.isGame = false;
     },
 
@@ -258,34 +262,21 @@ export default {
       }
     },
 
-    toggleActionsAnimation(flag) {
-      // console.log(getComputedStyle(this.$refs.monster.$el)['animation-duration']);
-
-      this.actionAnimationFlags[flag] = true;
-      setTimeout(() => {
-        this.actionAnimationFlags[flag] = false;
-      }, 500);
-    },
-
     addActionToLog(action) {
       this.lastActions.unshift(action);
     },
 
     heroTurn(action) {
-      const audioSword = new Audio(sounds.sword);
-
       if (action === ACTIONS_ENUM.MELEE) {
         const hit = this.currentHero.executeAttack();
 
         if (this.currentMonster.isAttackBlocked('combatEfficiency'))
           this.monsterTurn(this.currentMonster.drawRandomAction());
 
-        this.currentMonster.takeDamage(hit);
+        this.currentMonster.takeDamage(hit, 'smallHit');
         this.addActionToLog(`Hero hit for ${hit}`);
 
-        audioSword.play();
-
-        this.toggleActionsAnimation();
+        this.playSound(sounds.sword);
       }
 
       if (action === ACTIONS_ENUM.MAGIC) {
@@ -294,7 +285,7 @@ export default {
         if (this.currentMonster.isAttackBlocked('magicKnowledge'))
           this.monsterTurn(this.currentMonster.drawRandomAction());
 
-        this.currentMonster.takeDamage(spell);
+        this.currentMonster.takeDamage(spell, 'castSpell');
         this.addActionToLog(`Hero casted a spell for ${spell}`);
         // this.$refs.monster.$el.classList.add('animate__wobble');
       }
@@ -312,11 +303,9 @@ export default {
         if (this.currentMonster.isAttackBlocked('specialAttack'))
           this.monsterTurn(this.currentMonster.drawRandomAction());
 
-        this.currentMonster.takeDamage(special);
+        this.currentMonster.takeDamage(special, 'bigHit');
         this.addActionToLog(`Hero use special attack for ${special}`);
         this.currentHero.setCooldown('special', 7);
-
-        this.toggleActionsAnimation();
       }
 
       if (this.currentMonster.isDead()) {
@@ -325,6 +314,11 @@ export default {
         this.monsterTurn(this.currentMonster.drawRandomAction());
       }
       this.toggleTurn();
+    },
+
+    playSound: async function (audio) {
+      const sound = new Audio(audio);
+      return await sound.play();
     },
 
     monsterTurn(rdmAction) {
@@ -345,18 +339,18 @@ export default {
               this.endTurn();
               return;
             }
-            this.currentHero.takeDamage(spell);
+            this.currentHero.takeDamage(spell, 'castSpell');
             this.addActionToLog(`Monster casted a spell for ${spell}`);
           } else {
             if (this.currentHero.isAttackBlocked('combatEfficiency')) {
               this.endTurn();
               return;
             }
-            this.currentHero.takeDamage(hit);
+            this.currentHero.takeDamage(hit, 'smallHit');
             this.addActionToLog(`Monster hit for ${hit}`);
           }
         } else if (monsterCombat > monsterMagic) {
-          this.currentHero.takeDamage(hit);
+          this.currentHero.takeDamage(hit, 'smallHit');
           if (this.currentHero.isAttackBlocked('combatEfficiency')) {
             this.endTurn();
             return;
@@ -367,7 +361,7 @@ export default {
             this.endTurn();
             return;
           }
-          this.currentHero.takeDamage(spell);
+          this.currentHero.takeDamage(spell, 'castSpell');
           this.addActionToLog(`Monster casted a spell for ${spell}`);
         }
       } else {

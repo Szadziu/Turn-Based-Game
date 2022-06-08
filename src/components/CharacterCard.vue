@@ -1,5 +1,13 @@
 <template>
-  <div class="card">
+  <div
+    class="card animate__animated"
+    :class="{
+      animate__shakeX: char.getAnimationsFlag('smallHit'),
+      animate__wobble: char.getAnimationsFlag('bigHit'),
+      animate__heartBeat: char.getAnimationsFlag('heal'),
+      animate__rubberBand: char.getAnimationsFlag('castSpell'),
+    }"
+  >
     <div class="card__image" :class="{ dead: heroDead }">
       <img :src="char.image" :alt="char.name" />
     </div>
@@ -9,12 +17,9 @@
 
     <div class="card__name">{{ char.name }}</div>
 
-    <div class="block" v-if="char.blocked">
+    <div class="block" v-if="char.getAnimationsFlag('blocked')">
       <img
-        class="block__img animate__animated"
-        :class="{
-          animate__flash: char.blocked,
-        }"
+        class="block__img animate__animated animate__flash"
         src="../assets/shield.png"
         alt="shield"
       />

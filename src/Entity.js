@@ -7,12 +7,19 @@ export class Entity {
     this.combatEfficiency = combatEfficiency;
     this.magicKnowledge = magicKnowledge;
     this.image = img;
-    this.blocked = false;
 
     this.maxHealth = health;
 
     this.cooldows = {
       healing: 2,
+    };
+
+    this.animationsFlags = {
+      blocked: false,
+      smallHit: false,
+      bigHit: false,
+      castSpell: false,
+      heal: false,
     };
   }
 
@@ -53,8 +60,11 @@ export class Entity {
     this.currentHealth = value;
   }
 
-  takeDamage(amount) {
+  takeDamage(amount, type) {
     this.currentHealth -= amount;
+
+    this.setAnimationsFlag(type, true);
+    setTimeout(() => this.setAnimationsFlag(type, false), 1000);
   }
 
   isDead() {
@@ -69,6 +79,14 @@ export class Entity {
     this.cooldows[name] = value;
   }
 
+  setAnimationsFlag(name, value = false) {
+    this.animationsFlags[name] = value;
+  }
+
+  getAnimationsFlag(name) {
+    return this.animationsFlags[name];
+  }
+
   getCooldown(name) {
     return this.cooldows[name];
   }
@@ -81,8 +99,8 @@ export class Entity {
       // this.addActionToLog(`${this.name} blocked attack`);
       console.log(`block chance ${chance}%`);
 
-      this.setAttribute('blocked', true);
-      setTimeout(() => this.setAttribute('blocked', false), 1000);
+      this.setAnimationsFlag('blocked', true);
+      setTimeout(() => this.setAnimationsFlag('blocked', false), 1000);
 
       return true;
     } else {
