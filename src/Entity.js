@@ -93,9 +93,9 @@ export class Entity {
 
   isAttackBlocked(type) {
     const chance = this.getAttribute(type) / 4;
-    const probability = getRandomInt(0, 100 + chance);
+    const probability = getRandomInt(0, 100);
 
-    if (probability < chance) {
+    if (probability <= chance) {
       // this.addActionToLog(`${this.name} blocked attack`);
       console.log(`block chance ${chance}%`);
 
