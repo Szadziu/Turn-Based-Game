@@ -16,7 +16,7 @@ export class Monster extends Entity {
   drawRandomAction(enemy) {
     const rdm = getRandomInt(0, !this.getCooldown('healing') ? 3 : 2);
 
-    //TODO przeniesc cala logike
+    let action;
 
     const actions = {
       attack: 100,
@@ -39,7 +39,21 @@ export class Monster extends Entity {
       // actions.heal = 10;
     }
 
-    console.log(enemy);
-    return Object.values(ACTIONS_ENUM)[rdm];
+    if (rdm < 2) {
+      action =
+        this.mainSkill() === 'combatEfficiency'
+          ? ACTIONS_ENUM.MELEE
+          : ACTIONS_ENUM.MAGIC;
+
+      if (this.dualSpecialization) {
+        action =
+          enemy.weakSkill() === 'combatEfficiency'
+            ? ACTIONS_ENUM.MELEE
+            : ACTIONS_ENUM.MAGIC;
+      }
+    } else {
+      action = ACTIONS_ENUM.HEAL;
+    }
+    return action;
   }
 }

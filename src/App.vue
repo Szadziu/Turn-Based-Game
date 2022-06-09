@@ -323,7 +323,7 @@ export default {
 
       //* 4. Bez względu na to jaka była akcja, jeżeli bohater ma się uleczyć to to robimy
       if (heal > 0) {
-        this.currentHero.setHealth(heal); // przy czym jak jest setHealth, to chyba powinno być przekazane coś na zasadzie this.currentHero.currentHealt + heal?
+        this.currentHero.setHealth(heal);
       }
 
       //* 5. Co mieliśmy wykonać dla bohatera to jest wykonane, więc koniec tury, funkcja endTurn powinna sprawdzić czy wszyscy żyją i zrobić ew. sprzątanie + oddać turę przeciwnikowi do wykonania
@@ -336,33 +336,24 @@ export default {
         heal = 0,
         attack_type = 'combatEfficiency';
 
-      if (action === ACTIONS_ENUM.MELEE || action === ACTIONS_ENUM.MAGIC) {
-        hit =
-          this.currentMonster.mainSkill() === 'combatEfficiency'
-            ? this.currentMonster.executeAttack()
-            : this.currentMonster.castSpell();
-
-        attack_type = this.currentMonster.mainSkill();
-
-        if (this.currentMonster.dualSpecialization) {
-          attack_type = this.currentHero.weakSkill();
-        }
-
+      //* 1. Obsługa wszystkich przypadków, które generują obrażenia przeciwnikowi
+      if (action === ACTIONS_ENUM.MELEE) {
+        hit = this.currentMonster.executeAttack();
+        attack_type = 'combatEfficiency';
         this.addActionToLog({
           type: 'monster',
-          msg: `${
-            attack_type === 'combatEfficiency' ? 'attacked' : 'casted spell'
-          } for ${hit}`,
+          msg: `attacked for ${hit}`,
         });
-      } else if (action === ACTIONS_ENUM.SPECIAL) {
-        hit = this.currentHero.specialAttack();
-        attack_type = this.currentMonster.mainSkill();
+      } else if (action === ACTIONS_ENUM.MAGIC) {
+        hit = this.currentMonster.castSpell();
+        attack_type = 'magicKnowledge';
         this.addActionToLog({
           type: 'monster',
-          msg: `dealt ${hit} damage with special attack`,
+          msg: `casted a spell for ${hit} damage`,
         });
       }
 
+      //* 2. Obsługa wszystkich przypadków, które powodują leczenie bohatera
       if (action === ACTIONS_ENUM.HEAL) {
         heal = this.currentMonster.healSelf();
         this.addActionToLog({
@@ -371,15 +362,46 @@ export default {
         });
       }
 
+      //* 3. Bez względu na to jaka była akcja, jeżeli przeciwnik ma oberwać, to próbujemy do tego doprowadzić
       if (hit > 0 && !this.currentHero.isAttackBlocked(attack_type)) {
         this.currentHero.takeDamage(hit);
       }
 
+      //* 4. Bez względu na to jaka była akcja, jeżeli bohater ma się uleczyć to to robimy
       if (heal > 0) {
         this.currentMonster.setHealth(heal);
       }
 
+      //* 5. Co mieliśmy wykonać dla bohatera to jest wykonane, więc koniec tury, funkcja endTurn powinna sprawdzić czy wszyscy żyją i zrobić ew. sprzątanie + oddać turę przeciwnikowi do wykonania
       this.endTurn();
+      // let hit = 0,
+      //   heal = 0,
+      //   attack_type = 'combatEfficiency';
+
+      //   this.addActionToLog({
+      //     type: 'monster',
+      //     msg: `${
+      //       attack_type === 'combatEfficiency' ? 'attacked' : 'casted spell'
+      //     } for ${hit}`,
+      //   });
+
+      // if (action === ACTIONS_ENUM.HEAL) {
+      //   heal = this.currentMonster.healSelf();
+      //   this.addActionToLog({
+      //     type: 'monster',
+      //     msg: `healed to ${heal} HP`,
+      //   });
+      // }
+
+      // if (hit > 0 && !this.currentHero.isAttackBlocked(attack_type)) {
+      //   this.currentHero.takeDamage(hit);
+      // }
+
+      // if (heal > 0) {
+      //   this.currentMonster.setHealth(heal);
+      // }
+
+      // this.endTurn();
     },
 
     //* SWITCH TURN - funkcja przełącza tury

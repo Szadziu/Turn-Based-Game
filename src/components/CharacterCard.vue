@@ -1,7 +1,7 @@
 <template>
   <transition name="slide" mode="out-in" appear>
     <div
-      class="card animate__animated animate__fadeIn"
+      class="card animate__animated"
       :class="{
         animate__headShake: char.getAnimationsFlag('smallHit'),
         animate__wobble: char.getAnimationsFlag('bigHit'),
