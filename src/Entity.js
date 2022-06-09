@@ -1,12 +1,14 @@
 import { getRandomInt } from './helpers/helpers';
 
 export class Entity {
-  constructor({ name, health, combatEfficiency, magicKnowledge, img }) {
+  constructor({ id, name, health, combatEfficiency, magicKnowledge, img }) {
+    this.id = id;
     this.name = name;
     this.currentHealth = health;
     this.combatEfficiency = combatEfficiency;
     this.magicKnowledge = magicKnowledge;
     this.image = img;
+    this.dualSpecialization = this.combatEfficiency === this.magicKnowledge;
 
     this.maxHealth = health;
 
@@ -18,9 +20,32 @@ export class Entity {
       blocked: false,
       smallHit: false,
       bigHit: false,
-      castSpell: false,
       heal: false,
     };
+  }
+
+  example() {
+    return new Promise((resolve) => {
+      const check = () => {
+        let x = true;
+
+        for (const anim in this.animationsFlags) {
+          if (Object.hasOwnProperty.call(this.animationsFlags, anim)) {
+            if (this.animationsFlags[anim]) {
+              x = false;
+              break;
+            }
+          }
+        }
+
+        if (x) {
+          resolve();
+        } else {
+          setTimeout(check, 100);
+        }
+      };
+      check();
+    });
   }
 
   executeAttack() {
@@ -41,6 +66,11 @@ export class Entity {
     const powerOfHealing = getRandomInt(10, 50);
     const healing = Math.round((powerOfHealing * this.maxHealth) / 100);
 
+    this.cooldows.healing = 3;
+
+    this.setAnimationsFlag('heal', true);
+    setTimeout(() => this.setAnimationsFlag('heal', false), 1000);
+
     if (this.currentHealth + healing > this.maxHealth) {
       return this.maxHealth;
     } else {
@@ -56,15 +86,32 @@ export class Entity {
     return this[attr];
   }
 
+  mainSkill() {
+    return this.combatEfficiency > this.magicKnowledge
+      ? 'combatEfficiency'
+      : 'magicKnowledge';
+  }
+
+  weakSkill() {
+    return this.combatEfficiency > this.magicKnowledge
+      ? 'magicKnowledge'
+      : 'combatEfficiency';
+  }
+
   setHealth(value) {
     this.currentHealth = value;
   }
 
-  takeDamage(amount, type) {
+  takeDamage(amount) {
     this.currentHealth -= amount;
 
-    this.setAnimationsFlag(type, true);
-    setTimeout(() => this.setAnimationsFlag(type, false), 1000);
+    if (amount > this.maxHealth * 0.4) {
+      this.setAnimationsFlag('bigHit', true);
+      setTimeout(() => this.setAnimationsFlag('bigHit', false), 1000);
+    } else {
+      this.setAnimationsFlag('smallHit', true);
+      setTimeout(() => this.setAnimationsFlag('smallHit', false), 1000);
+    }
   }
 
   isDead() {
@@ -97,9 +144,6 @@ export class Entity {
     const probability = getRandomInt(0, 100);
 
     if (probability <= chance) {
-      // this.addActionToLog(`${this.name} blocked attack`);
-      console.log(`block chance ${chance}%`);
-
       this.setAnimationsFlag('blocked', true);
       setTimeout(() => this.setAnimationsFlag('blocked', false), 1000);
 

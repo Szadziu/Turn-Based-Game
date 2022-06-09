@@ -12,6 +12,8 @@ export class Hero extends Entity {
     const powerOfAttack = getRandomInt(100, 300);
     const special = Math.round((powerOfAttack * this.getHighestSpec()) / 100);
 
+    this.cooldows.special = 7;
+
     return special;
   }
 

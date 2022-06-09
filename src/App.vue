@@ -87,7 +87,8 @@
           class="skills"
           @click="toggleCreditsManager()"
           v-if="isGame"
-          >+</FancyButton
+        >
+          {{ availableCredits }}</FancyButton
         >
       </div>
       <transition name="bounce" appear>
@@ -162,7 +163,7 @@ export default {
       currentHero: '',
       currentMonster: '',
       heroesPool: Heroes,
-      allMonsters: Monsters,
+      monstersPool: [],
       currentMonsterLevel: 1,
       defeatedMonsters: 0,
       lastActions: [],
@@ -172,22 +173,14 @@ export default {
       isCreditsManagerOpen: false,
       actionList: null,
       publicPath: process.env.BASE_URL,
+      allMonsters: Monsters,
+      ACTIONS_ENUM: ACTIONS_ENUM,
     };
   },
 
   components: {
     CharacterCard,
     FancyButton,
-  },
-  computed: {
-    monstersPool() {
-      return this.allMonsters.filter(
-        (monster) => monster.level === this.currentMonsterLevel
-      );
-    },
-    ACTIONS_ENUM() {
-      return ACTIONS_ENUM;
-    },
   },
 
   methods: {
@@ -196,6 +189,10 @@ export default {
     },
 
     createMonster() {
+      if (this.monstersPool.length === 0) {
+        this.isGame = false;
+        return;
+      }
       const rdm = getRandomInt(0, this.monstersPool.length);
       this.currentMonster = new Monster(this.monstersPool[rdm]);
     },
@@ -213,7 +210,9 @@ export default {
       this.currentHero = '';
       this.currentMonster = '';
       this.currentMonsterLevel = 1;
-      this.allMonsters = Monsters;
+      this.monstersPool = this.allMonsters.filter(
+        (monster) => monster.level === this.currentMonsterLevel
+      );
       this.isGame = true;
     },
 
@@ -221,27 +220,25 @@ export default {
       this.isCreditsManagerOpen = !this.isCreditsManagerOpen;
     },
 
-    //* PORAŻKA POTWORA - funkcja powinna:
-    //* - podnosić poziom pokonanych potworów
-    //* - podnieść ilość kredytów o 5
-    //* - zregenerować bohatera
-    //* - dodać do loga ostatnie akcje
-    //* - usunąć lub wykluczyć pokonanego potwora
-    //* - stworzyć nowego potwora
     monsterDead() {
-      this.defeatedMonsters++;
       this.availableCredits += 5;
       this.currentHero.regenerateInjures();
-      this.addActionToLog(`${this.currentMonster.name} died`);
-      this.addActionToLog(`Hero regenerated`);
-
-      //! czy to dobre podejście ?
-      this.allMonsters = this.allMonsters.filter(
-        (monster) => this.currentMonster.name !== monster.name
+      this.addActionToLog({
+        type: 'monster',
+        msg: 'died',
+      });
+      this.addActionToLog({
+        type: 'hero',
+        msg: 'regenerated',
+      });
+      this.monstersPool = this.allMonsters.filter(
+        (monster) =>
+          monster.level === this.currentMonsterLevel &&
+          monster.id !== this.currentMonster.id
       );
 
-      //!
       this.createMonster();
+      this.toggleTurn();
     },
 
     //* AWANS - funkcja powinna przyjąć podnoszoną statystykę oraz uaktualnić stan bohatera
@@ -261,120 +258,125 @@ export default {
     },
 
     addActionToLog(action) {
-      this.lastActions.unshift(action);
+      this.lastActions.unshift(`${action.type} ${action.msg}`);
     },
 
     playSound(audio) {
       return new Promise((resolve, reject) => {
-        console.log(resolve, reject);
+        // console.log(resolve, reject);
         const sound = new Audio(audio);
 
         sound.play();
+        //! nie działa
+        // console.log(sound.ended);
         if (sound.ended) {
           resolve();
+          reject();
         }
+        //!
       });
     },
 
     //* TURA BOHATERA - przyjmuje akcje, którą wybrał bohater i ją wykonuje. Na koniec wywołuje endTurn()
     heroTurn(action) {
+      let hit = 0,
+        heal = 0,
+        attack_type = 'combatEfficiency';
+
+      //* 1. Obsługa wszystkich przypadków, które generują obrażenia przeciwnikowi
       if (action === ACTIONS_ENUM.MELEE) {
-        const hit = this.currentHero.executeAttack();
-
-        //! do przeniesienia w inne miejsce (metoda ataku w klasie Entity ?)
-        this.playSound(`${this.publicPath}sounds/sword.wav`);
-        //!
-
-        if (this.currentMonster.isAttackBlocked('combatEfficiency')) {
-          this.monsterTurn(this.currentMonster.drawRandomAction());
-          //* endturn
-          return;
-        }
-
-        this.currentMonster.takeDamage(hit, 'smallHit');
-        this.addActionToLog(`Hero hit for ${hit}`);
+        hit = this.currentHero.executeAttack();
+        attack_type = 'combatEfficiency';
+        this.addActionToLog({
+          type: 'hero',
+          msg: `attacked for ${hit}`,
+        });
+      } else if (action === ACTIONS_ENUM.MAGIC) {
+        hit = this.currentHero.castSpell();
+        attack_type = 'magicKnowledge';
+        this.addActionToLog({
+          type: 'hero',
+          msg: `casted a spell for ${hit} damage`,
+        });
+      } else if (action === ACTIONS_ENUM.SPECIAL) {
+        hit = this.currentHero.specialAttack();
+        attack_type = this.currentHero.mainSkill();
+        this.addActionToLog({
+          type: 'hero',
+          msg: `dealt ${hit} damage with special attack`,
+        });
       }
 
-      if (action === ACTIONS_ENUM.MAGIC) {
-        const spell = this.currentHero.castSpell();
-
-        if (this.currentMonster.isAttackBlocked('magicKnowledge')) {
-          this.monsterTurn(this.currentMonster.drawRandomAction());
-          return;
-        }
-
-        this.currentMonster.takeDamage(spell, 'castSpell');
-        this.addActionToLog(`Hero casted a spell for ${spell}`);
-      }
-
+      //* 2. Obsługa wszystkich przypadków, które powodują leczenie bohatera
       if (action === ACTIONS_ENUM.HEAL) {
-        const healing = this.currentHero.healSelf();
-
-        this.currentHero.setHealth(healing);
-        this.addActionToLog(`Hero healed up`);
-        this.currentHero.setCooldown('healing', 3);
+        heal = this.currentHero.healSelf();
+        this.addActionToLog({
+          type: 'hero',
+          msg: `healed to ${heal} HP`,
+        });
       }
 
-      if (action === ACTIONS_ENUM.SPECIAL) {
-        const special = this.currentHero.specialAttack();
-
-        if (this.currentMonster.isAttackBlocked('specialAttack')) {
-          this.monsterTurn(this.currentMonster.drawRandomAction());
-        }
-
-        this.currentMonster.takeDamage(special, 'bigHit');
-        this.addActionToLog(`Hero use special attack for ${special}`);
-        this.currentHero.setCooldown('special', 7);
+      //* 3. Bez względu na to jaka była akcja, jeżeli przeciwnik ma oberwać, to próbujemy do tego doprowadzić
+      if (hit > 0 && !this.currentMonster.isAttackBlocked(attack_type)) {
+        this.currentMonster.takeDamage(hit);
       }
 
+      //* 4. Bez względu na to jaka była akcja, jeżeli bohater ma się uleczyć to to robimy
+      if (heal > 0) {
+        this.currentHero.setHealth(heal); // przy czym jak jest setHealth, to chyba powinno być przekazane coś na zasadzie this.currentHero.currentHealt + heal?
+      }
+
+      //* 5. Co mieliśmy wykonać dla bohatera to jest wykonane, więc koniec tury, funkcja endTurn powinna sprawdzić czy wszyscy żyją i zrobić ew. sprzątanie + oddać turę przeciwnikowi do wykonania
       this.endTurn();
     },
 
     //* TURA POTWORA - przyjmuje losową akcje, i ją wykonuje. Na koniec wywołuje endTurn()
-    monsterTurn(rdmAction) {
-      const heroCombat = this.currentHero.combatEfficiency;
-      const monsterCombat = this.currentMonster.combatEfficiency;
-      const heroMagic = this.currentHero.magicKnowledge;
-      const monsterMagic = this.currentMonster.magicKnowledge;
-      if (
-        rdmAction === ACTIONS_ENUM.MELEE ||
-        rdmAction === ACTIONS_ENUM.MAGIC
-      ) {
-        const hit = this.currentMonster.executeAttack();
-        const spell = this.currentHero.castSpell();
+    monsterTurn(action) {
+      let hit = 0,
+        heal = 0,
+        attack_type = 'combatEfficiency';
+
+      if (action === ACTIONS_ENUM.MELEE || action === ACTIONS_ENUM.MAGIC) {
+        hit =
+          this.currentMonster.mainSkill() === 'combatEfficiency'
+            ? this.currentMonster.executeAttack()
+            : this.currentMonster.castSpell();
+
+        attack_type = this.currentMonster.mainSkill();
 
         if (this.currentMonster.dualSpecialization) {
-          if (heroCombat > heroMagic) {
-            if (this.currentHero.isAttackBlocked('magicKnowledge')) {
-              return;
-            }
-            this.currentHero.takeDamage(spell, 'castSpell');
-            this.addActionToLog(`Monster casted a spell for ${spell}`);
-          } else {
-            if (this.currentHero.isAttackBlocked('combatEfficiency')) {
-              return;
-            }
-            this.currentHero.takeDamage(hit, 'smallHit');
-            this.addActionToLog(`Monster hit for ${hit}`);
-          }
-        } else if (monsterCombat > monsterMagic) {
-          this.currentHero.takeDamage(hit, 'smallHit');
-          if (this.currentHero.isAttackBlocked('combatEfficiency')) {
-            return;
-          }
-          this.addActionToLog(`Monster hit for ${hit}`);
-        } else {
-          if (this.currentHero.isAttackBlocked('magicKnowledge')) {
-            return;
-          }
-          this.currentHero.takeDamage(spell, 'castSpell');
-          this.addActionToLog(`Monster casted a spell for ${spell}`);
+          attack_type = this.currentHero.weakSkill();
         }
-      } else {
-        const healing = this.currentMonster.healSelf();
-        this.currentMonster.setHealth(healing);
-        this.currentMonster.setCooldown('healing', 3);
-        this.addActionToLog(`Monster healed up`);
+
+        this.addActionToLog({
+          type: 'monster',
+          msg: `${
+            attack_type === 'combatEfficiency' ? 'attacked' : 'casted spell'
+          } for ${hit}`,
+        });
+      } else if (action === ACTIONS_ENUM.SPECIAL) {
+        hit = this.currentHero.specialAttack();
+        attack_type = this.currentMonster.mainSkill();
+        this.addActionToLog({
+          type: 'monster',
+          msg: `dealt ${hit} damage with special attack`,
+        });
+      }
+
+      if (action === ACTIONS_ENUM.HEAL) {
+        heal = this.currentMonster.healSelf();
+        this.addActionToLog({
+          type: 'monster',
+          msg: `healed to ${heal} HP`,
+        });
+      }
+
+      if (hit > 0 && !this.currentHero.isAttackBlocked(attack_type)) {
+        this.currentHero.takeDamage(hit);
+      }
+
+      if (heal > 0) {
+        this.currentMonster.setHealth(heal);
       }
 
       this.endTurn();
@@ -385,55 +387,55 @@ export default {
       this.currentTurn === 'hero'
         ? (this.currentTurn = 'monster')
         : (this.currentTurn = 'hero');
-
-      //! to się raczej nie powinno tutaj wykonywać
-      if (this.currentTurn === 'monster') {
-        this.monsterTurn(this.currentMonster.drawRandomAction());
-      }
-      //!
     },
 
     //* CLEANER - funkcja sprzątająca, kończąca turę. Powinna sprawdzać czy potwór/bohater padł.
     async endTurn() {
       if (this.currentMonster.isDead()) {
+        this.defeatedMonsters++;
+
         //* jeśli pula potworów się skończyła => podnieść level kolejnych potworów
         if (this.defeatedMonsters % 2 === 0 && this.defeatedMonsters > 0) {
-          console.log(this.defeatedMonsters % 2, 'podnoszę level');
           this.currentMonsterLevel++;
         }
+        console.log('start');
+        await this.currentMonster.example();
+        console.log('koniec');
         this.monsterDead();
-        return;
       }
 
       //! kod za await sie nie wykonuje
       if (this.currentHero.isDead()) {
-        await this.playSound(`${this.publicPath}sounds/dead.wav`);
+        // await this.playSound(`${this.publicPath}assets/sounds/dead.wav`);
         this.isGame = false;
       }
       //!
 
-      //* sprawdzamy czy są jeszcze potwory jeśli nie => gra się kończy
-      if (this.allMonsters.length === 0) {
-        this.isGame = false;
-        return;
-      }
-
       //* obniżenie cd's umiejętności dodatkowych
-      this.currentHero.setCooldown(
-        'healing',
-        this.currentHero.getCooldown('healing') - 1
-      );
-      this.currentHero.setCooldown(
-        'special',
-        this.currentHero.getCooldown('special') - 1
-      );
-      this.currentMonster.setCooldown(
-        'healing',
-        this.currentMonster.getCooldown('healing') - 1
-      );
+      if (this.currentTurn === 'hero') {
+        this.currentHero.setCooldown(
+          'healing',
+          this.currentHero.getCooldown('healing') - 1
+        );
+        this.currentHero.setCooldown(
+          'special',
+          this.currentHero.getCooldown('special') - 1
+        );
+      } else {
+        this.currentMonster.setCooldown(
+          'healing',
+          this.currentMonster.getCooldown('healing') - 1
+        );
+      }
 
       //* zmiana tury gracza
       this.toggleTurn();
+
+      if (this.currentTurn === 'monster') {
+        this.monsterTurn(
+          this.currentMonster.drawRandomAction(this.currentHero)
+        );
+      }
     },
   },
 };

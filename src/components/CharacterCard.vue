@@ -1,49 +1,57 @@
 <template>
-  <div
-    class="card animate__animated"
-    :class="{
-      animate__shakeX: char.getAnimationsFlag('smallHit'),
-      animate__wobble: char.getAnimationsFlag('bigHit'),
-      animate__heartBeat: char.getAnimationsFlag('heal'),
-      animate__rubberBand: char.getAnimationsFlag('castSpell'),
-    }"
-  >
-    <div class="card__image" :class="{ dead: heroDead }">
-      <img :src="char.image" :alt="char.name" />
-    </div>
-
-    <div v-if="char.level" class="card__level">level {{ char.level }}</div>
-    <div v-else class="card__level">hero</div>
-
-    <div class="card__name">{{ char.name }}</div>
-
-    <div class="block" v-if="char.getAnimationsFlag('blocked')">
-      <img
-        class="block__img animate__animated animate__flash"
-        src="/assets/items/shield.png"
-        alt="shield"
-      />
-    </div>
-
-    <HealthBar color="#42B782" v-model="percentageValue" />
-
-    <div class="card__stats">
-      <div class="one-third" :class="`one-third--${char.name}`">
-        <div class="stat">HP</div>
-        <div class="stat-value">{{ char.currentHealth }}</div>
+  <transition name="slide" mode="out-in" appear>
+    <div
+      class="card animate__animated animate__fadeIn"
+      :class="{
+        animate__headShake: char.getAnimationsFlag('smallHit'),
+        animate__wobble: char.getAnimationsFlag('bigHit'),
+        animate__slideOutUp: char.currentHealth <= 0,
+      }"
+    >
+      <div class="card__image" :class="{ dead: heroDead }">
+        <img :src="char.image" :alt="char.name" />
       </div>
 
-      <div class="one-third" :class="`one-third--${char.name}`">
-        <div class="stat">Combat</div>
-        <div class="stat-value">{{ char.combatEfficiency }}</div>
+      <div v-if="char.level" class="card__level">level {{ char.level }}</div>
+      <div v-else class="card__level">hero</div>
+
+      <div class="card__name">{{ char.name }}</div>
+
+      <div class="block" v-if="char.getAnimationsFlag('blocked')">
+        <img
+          class="block__img animate__animated animate__flash"
+          src="/assets/items/shield.png"
+          alt="shield"
+        />
+      </div>
+      <div class="block" v-if="char.getAnimationsFlag('heal')">
+        <img
+          class="block__img animate__animated animate__flash"
+          src="/assets/items/plus.png"
+          alt="heal"
+        />
       </div>
 
-      <div class="one-third" :class="`one-third--${char.name}`">
-        <div class="stat">Magic</div>
-        <div class="stat-value">{{ char.magicKnowledge }}</div>
+      <HealthBar color="#42B782" v-model="percentageValue" />
+
+      <div class="card__stats">
+        <div class="one-third" :class="`one-third--${char.name}`">
+          <div class="stat">HP</div>
+          <div class="stat-value">{{ char.currentHealth }}</div>
+        </div>
+
+        <div class="one-third" :class="`one-third--${char.name}`">
+          <div class="stat">Combat</div>
+          <div class="stat-value">{{ char.combatEfficiency }}</div>
+        </div>
+
+        <div class="one-third" :class="`one-third--${char.name}`">
+          <div class="stat">Magic</div>
+          <div class="stat-value">{{ char.magicKnowledge }}</div>
+        </div>
       </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script>
@@ -69,6 +77,20 @@ export default {
 
 <style lang="scss" scoped>
 @import '@/scss/variables.scss';
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
 
 .dead {
   filter: grayscale(1);
