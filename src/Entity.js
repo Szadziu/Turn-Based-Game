@@ -1,3 +1,4 @@
+import { ACTIONS_ENUM } from './cons/constants';
 import { getRandomInt } from './helpers/helpers';
 
 export class Entity {
@@ -88,8 +89,8 @@ export class Entity {
 
   mainSkill() {
     return this.combatEfficiency > this.magicKnowledge
-      ? 'combatEfficiency'
-      : 'magicKnowledge';
+      ? ACTIONS_ENUM.MELEE
+      : ACTIONS_ENUM.MAGIC;
   }
 
   weakSkill() {

@@ -300,7 +300,10 @@ export default {
         });
       } else if (action === ACTIONS_ENUM.SPECIAL) {
         hit = this.currentHero.specialAttack();
-        attack_type = this.currentHero.mainSkill();
+        attack_type =
+          this.currentHero.mainSkill() === ACTIONS_ENUM.MELEE
+            ? 'combatEfficiency'
+            : 'magicKnowledge';
         this.addActionToLog({
           type: 'hero',
           msg: `dealt ${hit} damage with special attack`,
@@ -355,6 +358,7 @@ export default {
 
       //* 2. Obsługa wszystkich przypadków, które powodują leczenie bohatera
       if (action === ACTIONS_ENUM.HEAL) {
+        console.log('DUPA');
         heal = this.currentMonster.healSelf();
         this.addActionToLog({
           type: 'monster',
