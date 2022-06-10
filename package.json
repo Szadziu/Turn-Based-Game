@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "animate.css": "^4.1.1",
-    "chance": "^1.1.8",
     "core-js": "^3.8.3",
     "vuejs-progress-bar": "^1.2.8"
   },

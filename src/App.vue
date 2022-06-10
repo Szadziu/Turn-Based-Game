@@ -358,7 +358,6 @@ export default {
 
       //* 2. Obsługa wszystkich przypadków, które powodują leczenie bohatera
       if (action === ACTIONS_ENUM.HEAL) {
-        console.log('DUPA');
         heal = this.currentMonster.healSelf();
         this.addActionToLog({
           type: 'monster',
@@ -424,9 +423,7 @@ export default {
         if (this.defeatedMonsters % 2 === 0 && this.defeatedMonsters > 0) {
           this.currentMonsterLevel++;
         }
-        console.log('start');
         await this.currentMonster.example();
-        console.log('koniec');
         this.monsterDead();
       }
 

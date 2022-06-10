@@ -28,18 +28,18 @@ export class Entity {
   example() {
     return new Promise((resolve) => {
       const check = () => {
-        let x = true;
+        let flag = true;
 
         for (const anim in this.animationsFlags) {
           if (Object.hasOwnProperty.call(this.animationsFlags, anim)) {
             if (this.animationsFlags[anim]) {
-              x = false;
+              flag = false;
               break;
             }
           }
         }
 
-        if (x) {
+        if (flag) {
           resolve();
         } else {
           setTimeout(check, 100);
@@ -91,12 +91,6 @@ export class Entity {
     return this.combatEfficiency > this.magicKnowledge
       ? ACTIONS_ENUM.MELEE
       : ACTIONS_ENUM.MAGIC;
-  }
-
-  weakSkill() {
-    return this.combatEfficiency > this.magicKnowledge
-      ? 'magicKnowledge'
-      : 'combatEfficiency';
   }
 
   setHealth(value) {
