@@ -6,6 +6,12 @@ export const Heroes = [
     combatEfficiency: 10,
     magicKnowledge: 10,
     img: '/assets/heroes/viking.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/dead.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_h2',
@@ -14,6 +20,12 @@ export const Heroes = [
     combatEfficiency: 2,
     magicKnowledge: 18,
     img: '/assets/heroes/wizard.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/dead.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_h3',
@@ -22,6 +34,12 @@ export const Heroes = [
     combatEfficiency: 14,
     magicKnowledge: 4,
     img: '/assets/heroes/rogue.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/dead.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_h4',
@@ -30,6 +48,12 @@ export const Heroes = [
     combatEfficiency: 13,
     magicKnowledge: 8,
     img: '/assets/heroes/knight.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/dead.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_h5',
@@ -38,6 +62,12 @@ export const Heroes = [
     combatEfficiency: 16,
     magicKnowledge: 3,
     img: '/assets/heroes/archer.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/dead.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_h6',
@@ -46,6 +76,12 @@ export const Heroes = [
     combatEfficiency: 10,
     magicKnowledge: 8,
     img: '/assets/heroes/druid.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/dead.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
 ];
 
@@ -58,6 +94,12 @@ export const Monsters = [
     combatEfficiency: 10,
     magicKnowledge: 2,
     img: '/assets/monsters/gnome.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/monsterDying.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_m2',
@@ -67,6 +109,12 @@ export const Monsters = [
     combatEfficiency: 4,
     magicKnowledge: 4,
     img: '/assets/monsters/goblin.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/monsterDying.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_m3',
@@ -76,6 +124,12 @@ export const Monsters = [
     combatEfficiency: 7,
     magicKnowledge: 1,
     img: '/assets/monsters/imp.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/monsterDying.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_m4',
@@ -85,6 +139,12 @@ export const Monsters = [
     combatEfficiency: 3,
     magicKnowledge: 2,
     img: '/assets/monsters/ogre.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/monsterDying.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_m5',
@@ -94,6 +154,12 @@ export const Monsters = [
     combatEfficiency: 13,
     magicKnowledge: 11,
     img: '/assets/monsters/troll.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/monsterDying.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_m6',
@@ -103,6 +169,12 @@ export const Monsters = [
     combatEfficiency: 15,
     magicKnowledge: 15,
     img: '/assets/monsters/dragon.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/monsterDying.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_m7',
@@ -112,6 +184,12 @@ export const Monsters = [
     combatEfficiency: 30,
     magicKnowledge: 1,
     img: '/assets/monsters/giant.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/monsterDying.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_m8',
@@ -121,6 +199,12 @@ export const Monsters = [
     combatEfficiency: 8,
     magicKnowledge: 25,
     img: '/assets/monsters/reaper.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/monsterDying.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_m9',
@@ -130,6 +214,12 @@ export const Monsters = [
     combatEfficiency: 12,
     magicKnowledge: 12,
     img: '/assets/monsters/harpy.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/monsterDying.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
   {
     id: '_m10',
@@ -139,5 +229,11 @@ export const Monsters = [
     combatEfficiency: 9,
     magicKnowledge: 11,
     img: '/assets/monsters/vampire.png',
+    sounds: {
+      attack: '/assets/sounds/sword.wav',
+      spell: '/assets/sounds/spell.wav',
+      dead: '/assets/sounds/monsterDying.wav',
+      block: '/assets/sounds/block.wav',
+    },
   },
 ];

@@ -2,13 +2,22 @@ import { ACTIONS_ENUM } from './cons/constants';
 import { getRandomInt } from './helpers/helpers';
 
 export class Entity {
-  constructor({ id, name, health, combatEfficiency, magicKnowledge, img }) {
+  constructor({
+    id,
+    name,
+    health,
+    combatEfficiency,
+    magicKnowledge,
+    img,
+    sounds,
+  }) {
     this.id = id;
     this.name = name;
     this.currentHealth = health;
     this.combatEfficiency = combatEfficiency;
     this.magicKnowledge = magicKnowledge;
     this.image = img;
+    this.sounds = sounds;
     this.dualSpecialization = this.combatEfficiency === this.magicKnowledge;
 
     this.maxHealth = health;
@@ -25,7 +34,7 @@ export class Entity {
     };
   }
 
-  example() {
+  animationsEnded() {
     return new Promise((resolve) => {
       const check = () => {
         let flag = true;
@@ -53,12 +62,16 @@ export class Entity {
     const powerOfAttack = getRandomInt(50, 150);
     const hit = Math.round((powerOfAttack * this.combatEfficiency) / 100);
 
+    new Audio(this.sounds.attack).play();
+
     return hit;
   }
 
   castSpell() {
     const powerOfMagic = getRandomInt(30, 180);
     const spell = Math.round((powerOfMagic * this.magicKnowledge) / 100);
+
+    new Audio(this.sounds.spell).play();
 
     return spell;
   }

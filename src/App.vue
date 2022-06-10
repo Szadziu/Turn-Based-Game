@@ -175,6 +175,7 @@ export default {
       publicPath: process.env.BASE_URL,
       allMonsters: Monsters,
       ACTIONS_ENUM: ACTIONS_ENUM,
+      activeTurn: false,
     };
   },
 
@@ -221,6 +222,7 @@ export default {
     },
 
     monsterDead() {
+      new Audio(this.currentMonster.sounds.dead).play();
       this.availableCredits += 5;
       this.currentHero.regenerateInjures();
       this.addActionToLog({
@@ -238,7 +240,6 @@ export default {
       );
 
       this.createMonster();
-      this.toggleTurn();
     },
 
     //* AWANS - funkcja powinna przyjąć podnoszoną statystykę oraz uaktualnić stan bohatera
@@ -259,22 +260,6 @@ export default {
 
     addActionToLog(action) {
       this.lastActions.unshift(`${action.type} ${action.msg}`);
-    },
-
-    playSound(audio) {
-      return new Promise((resolve, reject) => {
-        // console.log(resolve, reject);
-        const sound = new Audio(audio);
-
-        sound.play();
-        //! nie działa
-        // console.log(sound.ended);
-        if (sound.ended) {
-          resolve();
-          reject();
-        }
-        //!
-      });
     },
 
     //* TURA BOHATERA - przyjmuje akcje, którą wybrał bohater i ją wykonuje. Na koniec wywołuje endTurn()
@@ -377,62 +362,16 @@ export default {
 
       //* 5. Co mieliśmy wykonać dla bohatera to jest wykonane, więc koniec tury, funkcja endTurn powinna sprawdzić czy wszyscy żyją i zrobić ew. sprzątanie + oddać turę przeciwnikowi do wykonania
       this.endTurn();
-      // let hit = 0,
-      //   heal = 0,
-      //   attack_type = 'combatEfficiency';
-
-      //   this.addActionToLog({
-      //     type: 'monster',
-      //     msg: `${
-      //       attack_type === 'combatEfficiency' ? 'attacked' : 'casted spell'
-      //     } for ${hit}`,
-      //   });
-
-      // if (action === ACTIONS_ENUM.HEAL) {
-      //   heal = this.currentMonster.healSelf();
-      //   this.addActionToLog({
-      //     type: 'monster',
-      //     msg: `healed to ${heal} HP`,
-      //   });
-      // }
-
-      // if (hit > 0 && !this.currentHero.isAttackBlocked(attack_type)) {
-      //   this.currentHero.takeDamage(hit);
-      // }
-
-      // if (heal > 0) {
-      //   this.currentMonster.setHealth(heal);
-      // }
-
-      // this.endTurn();
-    },
-
-    //* SWITCH TURN - funkcja przełącza tury
-    toggleTurn() {
-      this.currentTurn === 'hero'
-        ? (this.currentTurn = 'monster')
-        : (this.currentTurn = 'hero');
     },
 
     //* CLEANER - funkcja sprzątająca, kończąca turę. Powinna sprawdzać czy potwór/bohater padł.
     async endTurn() {
-      if (this.currentMonster.isDead()) {
-        this.defeatedMonsters++;
+      this.activeTurn = true;
 
-        //* jeśli pula potworów się skończyła => podnieść level kolejnych potworów
-        if (this.defeatedMonsters % 2 === 0 && this.defeatedMonsters > 0) {
-          this.currentMonsterLevel++;
-        }
-        await this.currentMonster.example();
-        this.monsterDead();
-      }
-
-      //! kod za await sie nie wykonuje
       if (this.currentHero.isDead()) {
-        // await this.playSound(`${this.publicPath}assets/sounds/dead.wav`);
+        new Audio(this.currentHero.sounds.dead).play();
         this.isGame = false;
       }
-      //!
 
       //* obniżenie cd's umiejętności dodatkowych
       if (this.currentTurn === 'hero') {
@@ -452,13 +391,28 @@ export default {
       }
 
       //* zmiana tury gracza
-      this.toggleTurn();
+      this.currentTurn === 'hero'
+        ? (this.currentTurn = 'monster')
+        : (this.currentTurn = 'hero');
 
       if (this.currentTurn === 'monster') {
         this.monsterTurn(
           this.currentMonster.drawRandomAction(this.currentHero)
         );
       }
+
+      if (this.currentMonster.isDead()) {
+        this.defeatedMonsters++;
+
+        //* jeśli pula potworów się skończyła => podnieść level kolejnych potworów
+        if (this.defeatedMonsters % 2 === 0 && this.defeatedMonsters > 0) {
+          this.currentMonsterLevel++;
+        }
+        await this.currentMonster.animationsEnded();
+        this.monsterDead();
+      }
+
+      this.activeTurn = false;
     },
   },
 };
