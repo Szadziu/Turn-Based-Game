@@ -12,7 +12,7 @@ export class Hero extends Entity {
     const powerOfAttack = getRandomInt(100, 300);
     const special = Math.round((powerOfAttack * this.getHighestSpec()) / 100);
 
-    new Audio(this.sounds.attack).play();
+    this.playSound('attack');
 
     this.cooldows.special = 7;
 

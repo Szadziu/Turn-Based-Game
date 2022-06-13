@@ -31,7 +31,12 @@ export class Entity {
       smallHit: false,
       bigHit: false,
       heal: false,
+      dead: false,
     };
+  }
+
+  playSound(audio) {
+    new Audio(this.sounds[audio]).play();
   }
 
   animationsEnded() {
@@ -62,7 +67,7 @@ export class Entity {
     const powerOfAttack = getRandomInt(50, 150);
     const hit = Math.round((powerOfAttack * this.combatEfficiency) / 100);
 
-    new Audio(this.sounds.attack).play();
+    this.playSound('attack');
 
     return hit;
   }
@@ -71,7 +76,7 @@ export class Entity {
     const powerOfMagic = getRandomInt(30, 180);
     const spell = Math.round((powerOfMagic * this.magicKnowledge) / 100);
 
-    new Audio(this.sounds.spell).play();
+    this.playSound('spell');
 
     return spell;
   }
@@ -110,7 +115,7 @@ export class Entity {
     this.currentHealth = value;
   }
 
-  takeDamage(amount) {
+  async takeDamage(amount) {
     this.currentHealth -= amount;
 
     if (amount > this.maxHealth * 0.4) {
@@ -120,9 +125,15 @@ export class Entity {
       this.setAnimationsFlag('smallHit', true);
       setTimeout(() => this.setAnimationsFlag('smallHit', false), 1000);
     }
+
+    await this.animationsEnded();
   }
 
   isDead() {
+    if (this.currentHealth <= 0) {
+      this.setAnimationsFlag('dead', true);
+      setTimeout(() => this.setAnimationsFlag('dead', false), 1000);
+    }
     return this.currentHealth <= 0;
   }
 

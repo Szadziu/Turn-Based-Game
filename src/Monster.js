@@ -12,9 +12,6 @@ export class Monster extends Entity {
   drawRandomAction(enemy) {
     const isHealingOnCooldown = !!this.getCooldown('healing');
 
-    // const isHealingOnCooldown =
-    //   getRandomInt(0, !this.getCooldown('healing') ? 3 : 2) < 2;
-
     const getMainSkill = () => {
       if (enemy.dualSpecialization) {
         return this.mainSkill();
@@ -50,7 +47,7 @@ export class Monster extends Entity {
       [ACTIONS_ENUM.HEAL]: Math.max(0, 10 + Math.floor((75 - hp) / 10) * 10),
     };
 
-    if (enemy.currentHealth <= this.combatEfficiency) {
+    if (enemy.currentHealth <= this.getHighestSpec()) {
       console.log('HEALING DECREASED BY 80%');
       actions.HEAL = actions.HEAL / 5;
     }

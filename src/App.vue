@@ -22,30 +22,20 @@
         <div class="battle__hero-actions">
           <FancyButton
             @click="heroTurn(ACTIONS_ENUM.MELEE)"
-            :disabled="
-              currentHero.getAnimationsFlag('blocked') ||
-              currentMonster.getAnimationsFlag('blocked')
-            "
+            :disabled="isHeroTurn"
             :class="'character--attack'"
           >
             attack
           </FancyButton>
           <FancyButton
             @click="heroTurn(ACTIONS_ENUM.MAGIC)"
-            :disabled="
-              currentHero.getAnimationsFlag('blocked') ||
-              currentMonster.getAnimationsFlag('blocked')
-            "
+            :disabled="isHeroTurn"
             :class="'character--spell'"
           >
             cast spell
           </FancyButton>
           <FancyButton
-            :disabled="
-              currentHero.getCooldown('healing') > 0 ||
-              currentHero.getAnimationsFlag('blocked') ||
-              currentMonster.getAnimationsFlag('blocked')
-            "
+            :disabled="isHeroTurn || currentHero.getCooldown('healing') > 0"
             @click="heroTurn(ACTIONS_ENUM.HEAL)"
             :class="'character--heal'"
           >
@@ -58,11 +48,7 @@
           </FancyButton>
           <FancyButton
             @click="heroTurn('SPECIAL')"
-            :disabled="
-              currentHero.getCooldown('special') > 0 ||
-              currentHero.getAnimationsFlag('blocked') ||
-              currentMonster.getAnimationsFlag('blocked')
-            "
+            :disabled="isHeroTurn || currentHero.getCooldown('special') > 0"
             :class="'character--special'"
           >
             special attack
@@ -175,7 +161,7 @@ export default {
       publicPath: process.env.BASE_URL,
       allMonsters: Monsters,
       ACTIONS_ENUM: ACTIONS_ENUM,
-      activeTurn: false,
+      isHeroTurn: false,
     };
   },
 
@@ -222,7 +208,7 @@ export default {
     },
 
     monsterDead() {
-      new Audio(this.currentMonster.sounds.dead).play();
+      this.currentMonster.playSound('dead');
       this.availableCredits += 5;
       this.currentHero.regenerateInjures();
       this.addActionToLog({
@@ -263,7 +249,9 @@ export default {
     },
 
     //* TURA BOHATERA - przyjmuje akcje, którą wybrał bohater i ją wykonuje. Na koniec wywołuje endTurn()
-    heroTurn(action) {
+    async heroTurn(action) {
+      this.isHeroTurn = true;
+
       let hit = 0,
         heal = 0,
         attack_type = 'combatEfficiency';
@@ -306,12 +294,13 @@ export default {
 
       //* 3. Bez względu na to jaka była akcja, jeżeli przeciwnik ma oberwać, to próbujemy do tego doprowadzić
       if (hit > 0 && !this.currentMonster.isAttackBlocked(attack_type)) {
-        this.currentMonster.takeDamage(hit);
+        await this.currentMonster.takeDamage(hit);
       }
 
       //* 4. Bez względu na to jaka była akcja, jeżeli bohater ma się uleczyć to to robimy
       if (heal > 0) {
         this.currentHero.setHealth(heal);
+        await this.currentHero.animationsEnded();
       }
 
       //* 5. Co mieliśmy wykonać dla bohatera to jest wykonane, więc koniec tury, funkcja endTurn powinna sprawdzić czy wszyscy żyją i zrobić ew. sprzątanie + oddać turę przeciwnikowi do wykonania
@@ -366,10 +355,8 @@ export default {
 
     //* CLEANER - funkcja sprzątająca, kończąca turę. Powinna sprawdzać czy potwór/bohater padł.
     async endTurn() {
-      this.activeTurn = true;
-
       if (this.currentHero.isDead()) {
-        new Audio(this.currentHero.sounds.dead).play();
+        this.currentHero.playSound('dead');
         this.isGame = false;
       }
 
@@ -391,15 +378,6 @@ export default {
       }
 
       //* zmiana tury gracza
-      this.currentTurn === 'hero'
-        ? (this.currentTurn = 'monster')
-        : (this.currentTurn = 'hero');
-
-      if (this.currentTurn === 'monster') {
-        this.monsterTurn(
-          this.currentMonster.drawRandomAction(this.currentHero)
-        );
-      }
 
       if (this.currentMonster.isDead()) {
         this.defeatedMonsters++;
@@ -410,9 +388,20 @@ export default {
         }
         await this.currentMonster.animationsEnded();
         this.monsterDead();
+        this.currenTurn = 'hero';
+      } else {
+        this.currentTurn === 'hero'
+          ? (this.currentTurn = 'monster')
+          : (this.currentTurn = 'hero');
+
+        if (this.currentTurn === 'monster') {
+          this.monsterTurn(
+            this.currentMonster.drawRandomAction(this.currentHero)
+          );
+        }
       }
 
-      this.activeTurn = false;
+      this.isHeroTurn = false;
     },
   },
 };
