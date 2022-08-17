@@ -23,30 +23,9 @@ export class Monster extends Entity {
         };
 
         if (isHealingOnCooldown) {
-            console.log(
-                `HEALING ON COOLDOWN. RANDOM ACTION IS: ${getMainSkill()}`
-            );
             return getMainSkill();
         }
-
-        console.log(
-            `HEALING: ${isHealingOnCooldown ? 'unavailable' : 'available'}`
-        );
-        console.log(
-            `MONSTER HEALTH: ${Math.floor(
-                (this.currentHealth / this.maxHealth) * 100
-            )} %`
-        );
-
         const hp = Math.floor((this.currentHealth / this.maxHealth) * 100);
-
-        console.log(
-            `CHANCE FOR HEAL: ${Math.max(
-                0,
-                10 + Math.floor((75 - hp) / 10) * 10
-            )} %`
-        );
-
         const actions = {
             [getMainSkill()]: 100,
             [ACTIONS_ENUM.HEAL]: Math.max(

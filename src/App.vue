@@ -398,15 +398,15 @@ export default {
             }
 
             //* zmiana tury gracza
-            this.currentTurn === 'hero'
-                ? (this.currentTurn = 'monster')
-                : (this.currentTurn = 'hero');
+            //   this.currentTurn === 'hero'
+            //     ? (this.currentTurn = 'monster')
+            //     : (this.currentTurn = 'hero');
 
-            if (this.currentTurn === 'monster') {
-                this.monsterTurn(
-                    this.currentMonster.drawRandomAction(this.currentHero)
-                );
-            }
+            //   if (this.currentTurn === 'monster') {
+            //     this.monsterTurn(
+            //       this.currentMonster.drawRandomAction(this.currentHero)
+            //     );
+            //   }
 
             if (this.currentMonster.isDead()) {
                 this.defeatedMonsters++;
