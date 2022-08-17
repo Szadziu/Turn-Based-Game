@@ -15,57 +15,8 @@
         </div>
         <div class="battle__container">
             <div class="battle__characters-container" v-if="isGame">
-                <CharacterCard :char="currentMonster" />
                 <CharacterCard :char="currentHero" />
-            </div>
-            <div v-if="isCreditsManagerOpen" class="credits-manager">
-                <FancyButton class="close" @click="toggleCreditsManager()">
-                    X
-                </FancyButton>
-                <p class="credits-manager__feature credits-manager__title">
-                    Available credits: {{ availableCredits }} points
-                </p>
-                <div class="credits-manager__feature">
-                    <span class="credits-manager__feature-item">
-                        Combat Efficiency
-                    </span>
-
-                    <span class="credits-manager__feature-item">
-                        Magic Knowledge
-                    </span>
-
-                    <span class="credits-manager__feature-item">
-                        Maximum Health
-                    </span>
-                </div>
-                <div class="credits-manager__feature">
-                    <FancyButton
-                        class="update-stats"
-                        @click="updateHeroStats('combatEfficiency')"
-                    >
-                        +1
-                    </FancyButton>
-
-                    <FancyButton
-                        class="update-stats"
-                        @click="updateHeroStats('magicKnowledge')"
-                    >
-                        +1
-                    </FancyButton>
-
-                    <FancyButton
-                        class="update-stats"
-                        @click="updateHeroStats('currentHealth')"
-                    >
-                        +3
-                    </FancyButton>
-                </div>
-                <a
-                    href="https://www.flaticon.com/free-icons/knight"
-                    title="knight icons"
-                    class="icon-link"
-                    >All icons created by Freepik - Flaticon</a
-                >
+                <CharacterCard :char="currentMonster" />
             </div>
             <div v-if="isGame" class="battle__actions-container">
                 <div class="battle__hero-actions">
@@ -137,15 +88,54 @@
                     @click="toggleCreditsManager()"
                     v-if="isGame"
                 >
-                    {{
-                        `${
-                            availableCredits
-                                ? `Skill Points +${availableCredits}`
-                                : `Skill Points ${availableCredits}`
-                        }`
-                    }}
-                </FancyButton>
+                    {{ availableCredits }}</FancyButton
+                >
             </div>
+            <transition name="bounce" appear>
+                <div v-if="isCreditsManagerOpen" class="credits-manager">
+                    <FancyButton class="close" @click="toggleCreditsManager()">
+                        X
+                    </FancyButton>
+                    <p class="credits-manager__feature credits-manager__title">
+                        Available credits: {{ availableCredits }} points
+                    </p>
+                    <div class="credits-manager__feature">
+                        <span class="credits-manager__feature-item">
+                            Combat Efficiency
+                        </span>
+
+                        <span class="credits-manager__feature-item">
+                            Magic Knowledge
+                        </span>
+
+                        <span class="credits-manager__feature-item">
+                            Health
+                        </span>
+                    </div>
+                    <div class="credits-manager__feature">
+                        <FancyButton
+                            class="update-stats"
+                            @click="updateHeroStats('combatEfficiency')"
+                        >
+                            +1
+                        </FancyButton>
+
+                        <FancyButton
+                            class="update-stats"
+                            @click="updateHeroStats('magicKnowledge')"
+                        >
+                            +1
+                        </FancyButton>
+
+                        <FancyButton
+                            class="update-stats"
+                            @click="updateHeroStats('currentHealth')"
+                        >
+                            +3
+                        </FancyButton>
+                    </div>
+                </div>
+            </transition>
         </div>
 
         <div
@@ -430,6 +420,17 @@ export default {
                 }
                 await this.currentMonster.animationsEnded();
                 this.monsterDead();
+                this.currenTurn = 'hero';
+            } else {
+                this.currentTurn === 'hero'
+                    ? (this.currentTurn = 'monster')
+                    : (this.currentTurn = 'hero');
+
+                if (this.currentTurn === 'monster') {
+                    this.monsterTurn(
+                        this.currentMonster.drawRandomAction(this.currentHero)
+                    );
+                }
             }
 
             this.activeTurn = false;

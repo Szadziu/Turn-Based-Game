@@ -5,7 +5,7 @@
             :class="{
                 animate__headShake: char.getAnimationsFlag('smallHit'),
                 animate__wobble: char.getAnimationsFlag('bigHit'),
-                animate__slideOutUp: char.currentHealth <= 0,
+                animate__slideOutUp: char.getAnimationsFlag('dead'),
             }"
         >
             <div class="card__image" :class="{ dead: heroDead }">

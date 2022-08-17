@@ -14,7 +14,7 @@ export class Hero extends Entity {
             (powerOfAttack * this.getHighestSpec()) / 100
         );
 
-        new Audio(this.sounds.attack).play();
+        this.playSound('attack');
 
         this.cooldows.special = 7;
 
@@ -22,6 +22,7 @@ export class Hero extends Entity {
     }
 
     regenerateInjures() {
+        //* zapis połowy max hp można napewno lepiej zapisać
         if (this.currentHealth + this.maxHealth * 0.5 > this.maxHealth) {
             this.setHealth(this.maxHealth);
         } else {
