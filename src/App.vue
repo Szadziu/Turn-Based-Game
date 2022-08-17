@@ -15,8 +15,8 @@
         </div>
         <div class="battle__container">
             <div class="battle__characters-container" v-if="isGame">
-                <CharacterCard :char="currentHero" />
                 <CharacterCard :char="currentMonster" />
+                <CharacterCard :char="currentHero" />
             </div>
             <div v-if="isGame" class="battle__actions-container">
                 <div class="battle__hero-actions">
@@ -88,54 +88,52 @@
                     @click="toggleCreditsManager()"
                     v-if="isGame"
                 >
-                    {{ availableCredits }}</FancyButton
+                    {{ `skill points: ${availableCredits}` }}</FancyButton
                 >
             </div>
-            <transition name="bounce" appear>
-                <div v-if="isCreditsManagerOpen" class="credits-manager">
-                    <FancyButton class="close" @click="toggleCreditsManager()">
-                        X
-                    </FancyButton>
-                    <p class="credits-manager__feature credits-manager__title">
-                        Available credits: {{ availableCredits }} points
-                    </p>
-                    <div class="credits-manager__feature">
-                        <span class="credits-manager__feature-item">
-                            Combat Efficiency
-                        </span>
+            <div v-if="isCreditsManagerOpen" class="credits-manager">
+                <FancyButton class="close" @click="toggleCreditsManager()">
+                    X
+                </FancyButton>
+                <p class="credits-manager__feature credits-manager__title">
+                    Available credits: {{ availableCredits }} points
+                </p>
+                <div class="credits-manager__feature">
+                    <span class="credits-manager__feature-item">
+                        Combat Efficiency
+                    </span>
 
-                        <span class="credits-manager__feature-item">
-                            Magic Knowledge
-                        </span>
+                    <span class="credits-manager__feature-item">
+                        Magic Knowledge
+                    </span>
 
-                        <span class="credits-manager__feature-item">
-                            Health
-                        </span>
-                    </div>
-                    <div class="credits-manager__feature">
-                        <FancyButton
-                            class="update-stats"
-                            @click="updateHeroStats('combatEfficiency')"
-                        >
-                            +1
-                        </FancyButton>
-
-                        <FancyButton
-                            class="update-stats"
-                            @click="updateHeroStats('magicKnowledge')"
-                        >
-                            +1
-                        </FancyButton>
-
-                        <FancyButton
-                            class="update-stats"
-                            @click="updateHeroStats('currentHealth')"
-                        >
-                            +3
-                        </FancyButton>
-                    </div>
+                    <span class="credits-manager__feature-item">
+                        Maximum Health
+                    </span>
                 </div>
-            </transition>
+                <div class="credits-manager__feature">
+                    <FancyButton
+                        class="update-stats"
+                        @click="updateHeroStats('combatEfficiency')"
+                    >
+                        +1
+                    </FancyButton>
+
+                    <FancyButton
+                        class="update-stats"
+                        @click="updateHeroStats('magicKnowledge')"
+                    >
+                        +1
+                    </FancyButton>
+
+                    <FancyButton
+                        class="update-stats"
+                        @click="updateHeroStats('currentHealth')"
+                    >
+                        +3
+                    </FancyButton>
+                </div>
+            </div>
         </div>
 
         <div
@@ -555,8 +553,7 @@ body {
 .credits-manager {
     position: absolute;
     top: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
     z-index: 1000;
 
     display: flex;
@@ -578,7 +575,8 @@ body {
 
     @media (min-width: 468px) {
         top: 335px;
-        transform: transalte(-50%, -50%);
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     &__title {
@@ -611,23 +609,6 @@ body {
     line-height: 20px;
 }
 
-.bounce-enter-active {
-    animation: bounce-in 0.5s;
-}
-.bounce-leave-active {
-    animation: bounce-in 0.5s reverse;
-}
-@keyframes bounce-in {
-    0% {
-        transform: scale(0);
-    }
-    50% {
-        transform: scale(1.25);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
 .list-move,
 .list-enter-active,
 .list-leave-active {
