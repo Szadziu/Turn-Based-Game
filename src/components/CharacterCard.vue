@@ -26,9 +26,9 @@
                     alt="shield"
                 />
             </div>
-            <div class="block" v-if="char.getAnimationsFlag('heal')">
+            <div class="heal" v-if="char.getAnimationsFlag('heal')">
                 <img
-                    class="block__img animate__animated animate__flash"
+                    class="heal__img animate__animated animate__flash"
                     src="assets/items/plus.png"
                     alt="heal"
                 />
@@ -80,76 +80,72 @@ export default {
 <style lang="scss" scoped>
 @import '@/scss/variables.scss';
 
-.slide-fade-enter-active {
-    transition: all 0.3s ease-out;
-}
-
-.slide-fade-leave-active {
-    transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-    transform: translateX(20px);
-    opacity: 0;
-}
-
-.dead {
-    filter: grayscale(1);
-}
-
 .card {
     position: relative;
-    background: white;
-    min-width: 170px;
+
+    min-width: 120px;
+    width: 40%;
+    max-width: 170px;
     border-radius: $border-radius-size;
-    position: relative;
-    text-align: center;
     box-shadow: 0 0 0 1px black;
+
+    background: rgb(255, 255, 255);
+
+    text-align: center;
 
     &__image {
         position: relative;
+
         height: 100px;
         margin-bottom: 35px;
         border-top-left-radius: $border-radius-size;
         border-top-right-radius: $border-radius-size;
+
         img {
-            width: 90%;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+
+            width: 90%;
         }
     }
 
     &__level {
+        margin-bottom: 3px;
+
         text-transform: uppercase;
         font-size: 12px;
         font-weight: 700;
-        margin-bottom: 3px;
     }
 
     &__name {
-        font-size: 20px;
-        color: black;
-        font-weight: 900;
         margin-bottom: 5px;
+
+        color: black;
+
+        font-size: 20px;
         text-transform: uppercase;
+        font-weight: 900;
     }
 
     &__stats {
         display: flex;
-        font-weight: 700;
+        overflow: hidden;
+
         border-bottom-left-radius: $border-radius-size;
         border-bottom-right-radius: $border-radius-size;
-        overflow: hidden;
+
+        font-weight: 700;
 
         .one-third {
             width: 33%;
-            background-color: $barbarian;
-            color: white;
-            padding: 10px 5px;
+            padding: 5px 2px;
             box-sizing: content-box;
+
+            background-color: $barbarian;
+
+            color: rgb(255, 255, 255);
 
             &--viking {
                 background-color: $barbarian;
@@ -212,26 +208,54 @@ export default {
         }
         .stat {
             text-transform: uppercase;
-            font-weight: 400;
-            font-size: 12px;
             margin-bottom: 10px;
+
+            font-weight: 400;
+            font-size: 8px;
+
+            @media (min-width: 768px) {
+                font-size: 12px;
+            }
         }
 
         .stat-value {
             position: relative;
-            font-size: 24px;
-        }
-    }
-    .block {
-        position: absolute;
-        top: 60%;
-        left: 80%;
-        z-index: 999;
+            font-size: 18px;
 
-        &__img {
-            width: 80px;
-            height: 80px;
+            @media (min-width: 768px) {
+                font-size: 24px;
+            }
         }
     }
+}
+.block,
+.heal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    &__img {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+.dead {
+    filter: grayscale(1);
+}
+
+.slide-fade-enter-active {
+    transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+    transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+    transform: translateX(20px);
+    opacity: 0;
 }
 </style>

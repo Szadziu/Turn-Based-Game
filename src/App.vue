@@ -15,8 +15,8 @@
         </div>
         <div class="battle__container">
             <div class="battle__characters-container" v-if="isGame">
-                <CharacterCard :char="currentMonster" />
                 <CharacterCard :char="currentHero" />
+                <CharacterCard :char="currentMonster" />
             </div>
             <div v-if="isGame" class="battle__actions-container">
                 <div class="battle__hero-actions">
@@ -92,6 +92,12 @@
                 >
             </div>
             <div v-if="isCreditsManagerOpen" class="credits-manager">
+                <a
+                    class="icons-link"
+                    href="https://www.flaticon.com"
+                    title="icons"
+                    >All icons created by authors from Flaticon</a
+                >
                 <FancyButton class="close" @click="toggleCreditsManager()">
                     X
                 </FancyButton>
@@ -395,17 +401,6 @@ export default {
                 );
             }
 
-            //* zmiana tury gracza
-            //   this.currentTurn === 'hero'
-            //     ? (this.currentTurn = 'monster')
-            //     : (this.currentTurn = 'hero');
-
-            //   if (this.currentTurn === 'monster') {
-            //     this.monsterTurn(
-            //       this.currentMonster.drawRandomAction(this.currentHero)
-            //     );
-            //   }
-
             if (this.currentMonster.isDead()) {
                 this.defeatedMonsters++;
 
@@ -460,10 +455,10 @@ body {
 }
 
 .menu__choose-hero {
-    padding-top: 100px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-top: 100px;
 }
 
 .btn {
@@ -471,6 +466,11 @@ body {
 }
 
 .battle__container {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -478,28 +478,23 @@ body {
 
 .battle__characters-container {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    padding-top: 50px;
-    width: 100%;
-    row-gap: 50px;
+    gap: 20px;
 
-    @media (min-width: 468px) {
-        flex-direction: row;
-        justify-content: center;
-        column-gap: 50px;
-    }
+    width: 100%;
+    padding-top: 50px;
 }
 
 .battle__actions-container {
     position: relative;
-
-    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 100%;
     column-gap: 20px;
+
+    display: flex;
+    width: 100%;
 }
 
 .battle__hero-actions {
@@ -509,89 +504,97 @@ body {
 }
 
 .battle__actions-list {
-    display: none;
-    @media (min-width: 468px) {
-        display: flex;
-        flex-direction: column-reverse;
+    display: flex;
+    flex-direction: column-reverse;
 
-        min-width: 300px;
+    min-width: 300px;
+    height: 100px;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid gray;
+    border-radius: 8px;
+
+    overflow-y: scroll;
+    list-style-type: none;
+    user-select: none;
+
+    @media (min-width: 768px) {
         height: 200px;
-        padding: 10px;
-        margin-top: 10px;
-        border: 1px solid gray;
-        border-radius: 8px;
+    }
 
-        overflow-y: scroll;
-        list-style-type: none;
-        user-select: none;
+    &::-webkit-scrollbar {
+        width: 12px;
+    }
 
-        &::-webkit-scrollbar {
-            width: 12px;
-        }
+    &::-webkit-scrollbar-track {
+        box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+        border-radius: 14px;
+    }
 
-        &::-webkit-scrollbar-track {
-            box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-            border-radius: 14px;
-        }
+    &::-webkit-scrollbar-thumb {
+        border-radius: 14px;
+        box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+    }
 
-        &::-webkit-scrollbar-thumb {
-            border-radius: 14px;
-            box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
-        }
+    &::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
 
-        &::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
+    & li {
+        margin: 5px 0;
+        font-size: 12px;
 
-        & li {
-            margin: 20px 0;
-            font-size: 16px;
+        @media (min-width: 768px) {
+            font-size: 14px;
         }
     }
 }
 
 .credits-manager {
     position: absolute;
-    top: 0;
     left: 0;
+    bottom: 40px;
     z-index: 1000;
 
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
-    gap: 10px;
+    gap: 5px;
 
     width: 100%;
     max-width: 400px;
-    height: 300px;
-    padding: 20px;
+    height: 200px;
+    padding: 10px 10px 20px 10px;
     box-shadow: 0 0 3px 2px black;
 
     background-color: orangered;
     color: white;
 
-    font-size: 14px;
+    font-size: 12px;
     user-select: none;
 
     @media (min-width: 468px) {
-        top: 335px;
         left: 50%;
         transform: translateX(-50%);
+
+        height: 205px;
     }
 
     &__title {
-        font-size: 24px;
+        font-size: 16px;
     }
 
     &__feature {
         display: flex;
         justify-content: space-around;
         width: 100%;
+
         text-align: center;
 
         &-item {
             width: 30%;
-            font-size: 14px;
+
+            font-size: 12px;
         }
     }
 }
@@ -604,9 +607,21 @@ body {
     border: 1px solid gray;
 
     background-color: rgb(145, 226, 236);
+
     text-align: center;
     font-size: 18px;
     line-height: 20px;
+}
+
+.icons-link {
+    all: unset;
+
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 5px;
+
+    font-size: 8px;
 }
 
 .list-move,
@@ -651,9 +666,5 @@ body {
     60% {
         transform: translate3d(4px, 0, 0);
     }
-}
-
-.icon-link {
-    all: unset;
 }
 </style>
