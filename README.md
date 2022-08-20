@@ -33,4 +33,4 @@ The project is put into use in the basic version, in the future additional skill
 ## Sources
 
 That project was a one of first project during vue's learning.
-All icons was created from authors on Flaticon.
+All icons was created from authors on Flaticon. All resources used in this app are for coding learning only.
