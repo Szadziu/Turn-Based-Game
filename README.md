@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The application presents classic stopwatch for measuring of time. It is available on desktops and mobile devices.
+The application presents really fun and nice game. It is available on desktops and mobile devices.
 
 ## Technologies
 
