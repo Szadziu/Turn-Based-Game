@@ -1,15 +1,7 @@
 <template>
     <div id="app">
-        <div
-            class="menu__choose-hero animate__animated animate__slideInDown"
-            v-if="!isGame"
-        >
-            <FancyButton
-                v-for="(hero, i) in heroesPool"
-                :key="i"
-                @click="startGame(i + 1)"
-                :class="`hero--${hero.name}`"
-            >
+        <div class="menu__choose-hero animate__animated animate__slideInDown" v-if="!isGame">
+            <FancyButton v-for="(hero, i) in heroesPool" :key="i" @click="startGame(i + 1)" :class="`hero--${hero.name}`">
                 {{ hero.name }}
             </FancyButton>
         </div>
@@ -22,22 +14,14 @@
                 <div class="battle__hero-actions">
                     <FancyButton
                         @click="heroTurn(ACTIONS_ENUM.MELEE)"
-                        :disabled="
-                            currentHero.getAnimationsFlag('blocked') ||
-                            currentMonster.getAnimationsFlag('blocked')
-                        "
-                        :class="'character--attack'"
-                    >
+                        :disabled="currentHero.getAnimationsFlag('blocked') || currentMonster.getAnimationsFlag('blocked')"
+                        :class="'character--attack'">
                         attack
                     </FancyButton>
                     <FancyButton
                         @click="heroTurn(ACTIONS_ENUM.MAGIC)"
-                        :disabled="
-                            currentHero.getAnimationsFlag('blocked') ||
-                            currentMonster.getAnimationsFlag('blocked')
-                        "
-                        :class="'character--spell'"
-                    >
+                        :disabled="currentHero.getAnimationsFlag('blocked') || currentMonster.getAnimationsFlag('blocked')"
+                        :class="'character--spell'">
                         cast spell
                     </FancyButton>
                     <FancyButton
@@ -47,14 +31,9 @@
                             currentMonster.getAnimationsFlag('blocked')
                         "
                         @click="heroTurn(ACTIONS_ENUM.HEAL)"
-                        :class="'character--heal'"
-                    >
+                        :class="'character--heal'">
                         heal
-                        {{
-                            currentHero.getCooldown('healing')
-                                ? '(' + currentHero.getCooldown('healing') + ')'
-                                : ''
-                        }}
+                        {{ currentHero.getCooldown('healing') ? '(' + currentHero.getCooldown('healing') + ')' : '' }}
                     </FancyButton>
                     <FancyButton
                         @click="heroTurn('SPECIAL')"
@@ -63,106 +42,57 @@
                             currentHero.getAnimationsFlag('blocked') ||
                             currentMonster.getAnimationsFlag('blocked')
                         "
-                        :class="'character--special'"
-                    >
+                        :class="'character--special'">
                         special attack
-                        {{
-                            currentHero.getCooldown('special')
-                                ? '(' + currentHero.getCooldown('special') + ')'
-                                : ''
-                        }}
+                        {{ currentHero.getCooldown('special') ? '(' + currentHero.getCooldown('special') + ')' : '' }}
                     </FancyButton>
                 </div>
                 <ul class="battle__actions-list">
-                    <li
-                        class="animate__animated animate__fadeInUp"
-                        v-for="(action, i) in lastActions"
-                        :key="i"
-                    >
+                    <li class="animate__animated animate__fadeInUp" v-for="(action, i) in lastActions" :key="i">
                         {{ action }}
                     </li>
                 </ul>
-                <FancyButton
-                    :disabled="!availableCredits"
-                    class="skills"
-                    @click="toggleCreditsManager()"
-                    v-if="isGame"
-                >
+                <FancyButton :disabled="!availableCredits" class="skills" @click="toggleCreditsManager()" v-if="isGame">
                     {{ `skill points: ${availableCredits}` }}</FancyButton
                 >
             </div>
             <div v-if="isCreditsManagerOpen" class="credits-manager">
-                <a
-                    class="icons-link"
-                    href="https://www.flaticon.com"
-                    title="icons"
-                    >All icons created by authors from Flaticon</a
-                >
-                <FancyButton class="close" @click="toggleCreditsManager()">
-                    X
-                </FancyButton>
-                <p class="credits-manager__feature credits-manager__title">
-                    Available credits: {{ availableCredits }} points
-                </p>
+                <a class="icons-link" href="https://www.flaticon.com" target="_blank">All icons created by authors from Flaticon</a>
+                <FancyButton class="close" @click="toggleCreditsManager()"> X </FancyButton>
+                <p class="credits-manager__feature credits-manager__title">Available credits: {{ availableCredits }} points</p>
                 <div class="credits-manager__feature">
-                    <span class="credits-manager__feature-item">
-                        Combat Efficiency
-                    </span>
+                    <span class="credits-manager__feature-item"> Combat Efficiency </span>
 
-                    <span class="credits-manager__feature-item">
-                        Magic Knowledge
-                    </span>
+                    <span class="credits-manager__feature-item"> Magic Knowledge </span>
 
-                    <span class="credits-manager__feature-item">
-                        Maximum Health
-                    </span>
+                    <span class="credits-manager__feature-item"> Maximum Health </span>
                 </div>
                 <div class="credits-manager__feature">
-                    <FancyButton
-                        class="update-stats"
-                        @click="updateHeroStats('combatEfficiency')"
-                    >
-                        +1
-                    </FancyButton>
+                    <FancyButton class="update-stats" @click="updateHeroStats('combatEfficiency')"> +1 </FancyButton>
 
-                    <FancyButton
-                        class="update-stats"
-                        @click="updateHeroStats('magicKnowledge')"
-                    >
-                        +1
-                    </FancyButton>
+                    <FancyButton class="update-stats" @click="updateHeroStats('magicKnowledge')"> +1 </FancyButton>
 
-                    <FancyButton
-                        class="update-stats"
-                        @click="updateHeroStats('currentHealth')"
-                    >
-                        +3
-                    </FancyButton>
+                    <FancyButton class="update-stats" @click="updateHeroStats('currentHealth')"> +3 </FancyButton>
                 </div>
             </div>
         </div>
 
-        <div
-            v-if="!isGame && currentHero"
-            class="battle__results animate__animated animate__rubberBand"
-        >
+        <div v-if="!isGame && currentHero" class="battle__results animate__animated animate__rubberBand">
             Results: Defeated monsters: {{ defeatedMonsters }}
-            <p v-if="currentHero.currentHealth > 0">
-                Congratulations you defeated all monsters !
-            </p>
+            <p v-if="currentHero.currentHealth > 0">Congratulations you defeated all monsters !</p>
             <p v-else>Oh no... You lose. Maybe try again ?</p>
         </div>
     </div>
 </template>
 
 <script>
-import { ACTIONS_ENUM } from './cons/constants';
-import { Heroes, Monsters } from './cons/entities';
-import { Hero } from './Hero';
-import { Monster } from './Monster';
+import {ACTIONS_ENUM} from './cons/constants';
+import {Heroes, Monsters} from './cons/entities';
+import {Hero} from './Hero';
+import {Monster} from './Monster';
 import CharacterCard from './components/CharacterCard.vue';
 import FancyButton from './components/FancyButton.vue';
-import { getRandomInt } from './helpers/helpers';
+import {getRandomInt} from './helpers/helpers';
 
 export default {
     name: 'App',
@@ -219,9 +149,7 @@ export default {
             this.currentHero = '';
             this.currentMonster = '';
             this.currentMonsterLevel = 1;
-            this.monstersPool = this.allMonsters.filter(
-                (monster) => monster.level === this.currentMonsterLevel
-            );
+            this.monstersPool = this.allMonsters.filter((monster) => monster.level === this.currentMonsterLevel);
             this.isGame = true;
         },
 
@@ -242,9 +170,7 @@ export default {
                 msg: 'regenerated',
             });
             this.monstersPool = this.allMonsters.filter(
-                (monster) =>
-                    monster.level === this.currentMonsterLevel &&
-                    monster.id !== this.currentMonster.id
+                (monster) => monster.level === this.currentMonsterLevel && monster.id !== this.currentMonster.id
             );
 
             this.createMonster();
@@ -256,15 +182,9 @@ export default {
                 this.availableCredits--;
                 if (stat === 'currentHealth') {
                     this.currentHero.setHealth(this.currentHero[stat] + 3);
-                    this.currentHero.setAttribute(
-                        'maxHealth',
-                        this.currentHero.maxHealth + 3
-                    );
+                    this.currentHero.setAttribute('maxHealth', this.currentHero.maxHealth + 3);
                 } else {
-                    this.currentHero.setAttribute(
-                        stat,
-                        this.currentHero[stat] + 1
-                    );
+                    this.currentHero.setAttribute(stat, this.currentHero[stat] + 1);
                 }
             }
         },
@@ -296,10 +216,7 @@ export default {
                 });
             } else if (action === ACTIONS_ENUM.SPECIAL) {
                 hit = this.currentHero.specialAttack();
-                attack_type =
-                    this.currentHero.mainSkill() === ACTIONS_ENUM.MELEE
-                        ? 'combatEfficiency'
-                        : 'magicKnowledge';
+                attack_type = this.currentHero.mainSkill() === ACTIONS_ENUM.MELEE ? 'combatEfficiency' : 'magicKnowledge';
                 this.addActionToLog({
                     type: 'hero',
                     msg: `dealt ${hit} damage with special attack`,
@@ -386,43 +303,27 @@ export default {
 
             //* obniżenie cd's umiejętności dodatkowych
             if (this.currentTurn === 'hero') {
-                this.currentHero.setCooldown(
-                    'healing',
-                    this.currentHero.getCooldown('healing') - 1
-                );
-                this.currentHero.setCooldown(
-                    'special',
-                    this.currentHero.getCooldown('special') - 1
-                );
+                this.currentHero.setCooldown('healing', this.currentHero.getCooldown('healing') - 1);
+                this.currentHero.setCooldown('special', this.currentHero.getCooldown('special') - 1);
             } else {
-                this.currentMonster.setCooldown(
-                    'healing',
-                    this.currentMonster.getCooldown('healing') - 1
-                );
+                this.currentMonster.setCooldown('healing', this.currentMonster.getCooldown('healing') - 1);
             }
 
             if (this.currentMonster.isDead()) {
                 this.defeatedMonsters++;
 
                 //* jeśli pula potworów się skończyła => podnieść level kolejnych potworów
-                if (
-                    this.defeatedMonsters % 2 === 0 &&
-                    this.defeatedMonsters > 0
-                ) {
+                if (this.defeatedMonsters % 2 === 0 && this.defeatedMonsters > 0) {
                     this.currentMonsterLevel++;
                 }
                 await this.currentMonster.animationsEnded();
                 this.monsterDead();
                 this.currenTurn = 'hero';
             } else {
-                this.currentTurn === 'hero'
-                    ? (this.currentTurn = 'monster')
-                    : (this.currentTurn = 'hero');
+                this.currentTurn === 'hero' ? (this.currentTurn = 'monster') : (this.currentTurn = 'hero');
 
                 if (this.currentTurn === 'monster') {
-                    this.monsterTurn(
-                        this.currentMonster.drawRandomAction(this.currentHero)
-                    );
+                    this.monsterTurn(this.currentMonster.drawRandomAction(this.currentHero));
                 }
             }
 
@@ -572,6 +473,15 @@ body {
 
     font-size: 12px;
     user-select: none;
+
+    a {
+        cursor: pointer;
+        transition: color 0.3s;
+
+        &:hover {
+            color: black;
+        }
+    }
 
     @media (min-width: 468px) {
         left: 50%;
